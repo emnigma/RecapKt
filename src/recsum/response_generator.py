@@ -1,11 +1,11 @@
+from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import Runnable
-from langchain_openai import ChatOpenAI
 
 
 class ResponseGenerator:
-    def __init__(self, llm: ChatOpenAI, prompt_template: PromptTemplate) -> None:
+    def __init__(self, llm: BaseChatModel, prompt_template: PromptTemplate) -> None:
         self.llm = llm
         self.prompt_template = prompt_template
         self.chain = self._build_chain()

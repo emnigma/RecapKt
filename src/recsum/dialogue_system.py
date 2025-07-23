@@ -1,7 +1,9 @@
 import functools
 
+from enum import Enum
 from typing import Any, Optional
 
+from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
 from langgraph.constants import END
 from langgraph.graph import StateGraph
@@ -21,8 +23,18 @@ from src.recsum.response_generator import ResponseGenerator
 from src.recsum.summarizer import RecursiveSummarizer
 
 
+class WorkflowNode(Enum):
+    UPDATE_MEMORY = "update_memory"
+    GENERATE_RESPONSE = "generate_response"
+
+
+class ConditionalEdge(Enum):
+    CONTINUE_UPDATE = "continue_update"
+    FINISH_UPDATE = "finish_update"
+
+
 class DialogueSystem:
-    def __init__(self, llm: Optional[ChatOpenAI] = None) -> None:
+    def __init__(self, llm: Optional[BaseChatModel] = None) -> None:
         self.llm = llm or ChatOpenAI(model="gpt-3.5-turbo", temperature=0.0)
         self.summarizer = RecursiveSummarizer(self.llm, MEMORY_UPDATE_PROMPT_TEMPLATE)
         self.response_generator = ResponseGenerator(
@@ -34,22 +46,26 @@ class DialogueSystem:
         workflow = StateGraph(DialogueState)
 
         workflow.add_node(
-            "update_memory", functools.partial(update_memory_node, self.summarizer)
+            WorkflowNode.UPDATE_MEMORY.value,
+            functools.partial(update_memory_node, self.summarizer),
         )
         workflow.add_node(
-            "generate_response",
+            WorkflowNode.GENERATE_RESPONSE.value,
             functools.partial(generate_response_node, self.response_generator),
         )
 
-        workflow.set_entry_point("update_memory")
+        workflow.set_entry_point(WorkflowNode.UPDATE_MEMORY.value)
 
         workflow.add_conditional_edges(
-            "update_memory",
+            WorkflowNode.UPDATE_MEMORY.value,
             should_continue_memory_update,
-            {"continue_update": "update_memory", "finish_update": "generate_response"},
+            {
+                ConditionalEdge.CONTINUE_UPDATE.value: WorkflowNode.UPDATE_MEMORY.value,
+                ConditionalEdge.FINISH_UPDATE.value: WorkflowNode.GENERATE_RESPONSE.value,
+            },
         )
 
-        workflow.add_edge("generate_response", END)
+        workflow.add_edge(WorkflowNode.GENERATE_RESPONSE.value, END)
 
         return workflow.compile()
 
