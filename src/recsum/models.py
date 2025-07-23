@@ -1,20 +1,14 @@
 from dataclasses import dataclass
-from enum import Enum
-from typing import TypedDict
-
-
-class Role(Enum):
-    USER = "user"
-    BOT = "bot"
+from typing import Optional, TypedDict
 
 
 @dataclass
 class Message:
-    role: Role
+    role: str
     message: str
 
     def __str__(self) -> str:
-        return f"{self.role.value}: {self.message}"
+        return f"{self.role}: {self.message}"
 
 
 @dataclass
@@ -31,5 +25,5 @@ class Session:
 class DialogueState(TypedDict):
     dialogue_sessions: list[Session]
     current_session_index: int
-    memory: str
+    memory: Optional[list[str]]
     response: str

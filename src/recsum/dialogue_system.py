@@ -7,18 +7,18 @@ from langgraph.constants import END
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from graph_nodes import (
+from src.recsum.graph_nodes import (
     generate_response_node,
     should_continue_memory_update,
     update_memory_node,
 )
-from models import DialogueState, Session
-from prompts import (
+from src.recsum.models import DialogueState, Session
+from src.recsum.prompts import (
     MEMORY_UPDATE_PROMPT_TEMPLATE,
     RESPONSE_GENERATION_PROMPT_TEMPLATE,
 )
-from response_generator import ResponseGenerator
-from summarizer import RecursiveSummarizer
+from src.recsum.response_generator import ResponseGenerator
+from src.recsum.summarizer import RecursiveSummarizer
 
 
 class DialogueSystem:
@@ -53,11 +53,9 @@ class DialogueSystem:
 
         return workflow.compile()
 
-    def process_dialogue(
-        self, sessions: list[Session], initial_memory: str = ""
-    ) -> dict[str, Any]:
+    def process_dialogue(self, sessions: list[Session]) -> dict[str, Any]:
         initial_state = {
-            "memory": initial_memory,
+            "memory": None,
             "dialogue_sessions": sessions,
             "current_session_index": 0,
             "response": "",
