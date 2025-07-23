@@ -28,5 +28,6 @@ Follow these steps to successfully complete the task:
 5. Pay attention to the relevance and importance of the personality information, focusing on capturing
 the most significant aspects while maintaining the overall coherence of the memory.
 Previous Memory: {latest_memory}
-Current Context: {current_dialogue_context}"""
+Current Context: {current_dialogue_context}
+Query: {query}"""
 )

@@ -7,7 +7,7 @@ def update_memory_node(summarizer: Summarizer, state: DialogueState) -> Dialogue
     if state.memory is None:
         state.memory = []
 
-    if state.current_session_index < len(state.dialogue_sessions):
+    if state.current_session_index < len(state.dialogue_sessions) - 1:
         current_dialogue_session = state.dialogue_sessions[state.current_session_index]
 
         if len(current_dialogue_session) > 0:
@@ -26,9 +26,8 @@ def update_memory_node(summarizer: Summarizer, state: DialogueState) -> Dialogue
 def generate_response_node(
     response_generator: ResponseGenerator, state: DialogueState
 ) -> DialogueState:
-
     final_response = response_generator.generate_response(
-        state.latest_memory, state.current_context
+        state.latest_memory, str(state.current_context), state.query
     )
 
     state.response = final_response
@@ -36,7 +35,7 @@ def generate_response_node(
 
 
 def should_continue_memory_update(state: DialogueState) -> str:
-    if state.current_session_index < len(state.dialogue_sessions):
+    if state.current_session_index < len(state.dialogue_sessions) - 1:
         return "continue_update"
     else:
         return "finish_update"

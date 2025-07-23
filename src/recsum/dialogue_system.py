@@ -1,7 +1,7 @@
 import functools
 
 from enum import Enum
-from typing import Any, Optional
+from typing import Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
@@ -69,11 +69,13 @@ class DialogueSystem:
 
         return workflow.compile()
 
-    def process_dialogue(self, sessions: list[Session]) -> dict[str, Any]:
+    def process_dialogue(self, sessions: list[Session], query: str) -> DialogueState:
         initial_state = DialogueState(
-            memory = None,
-            dialogue_sessions = sessions,
-            current_session_index = 0,
-            response = "")
+            memory=None,
+            dialogue_sessions=sessions,
+            current_session_index=0,
+            query=query,
+            response="",
+        )
 
-        return self.graph.invoke(initial_state)
+        return DialogueState(**self.graph.invoke(initial_state))

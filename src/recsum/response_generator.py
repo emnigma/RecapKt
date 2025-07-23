@@ -13,10 +13,14 @@ class ResponseGenerator:
     def _build_chain(self) -> Runnable:
         return self.prompt_template | self.llm | StrOutputParser()
 
-    def generate_response(self, memory: str, dialogue_context: str) -> str:
+    def generate_response(self, memory: str, dialogue_context: str, query: str) -> str:
         try:
             response = self.chain.invoke(
-                {"latest_memory": memory, "current_dialogue_context": dialogue_context}
+                {
+                    "latest_memory": memory,
+                    "current_dialogue_context": dialogue_context,
+                    "query": query,
+                }
             )
             return response
         except Exception as e:
