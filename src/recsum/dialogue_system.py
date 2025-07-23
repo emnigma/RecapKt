@@ -70,11 +70,10 @@ class DialogueSystem:
         return workflow.compile()
 
     def process_dialogue(self, sessions: list[Session]) -> dict[str, Any]:
-        initial_state = {
-            "memory": None,
-            "dialogue_sessions": sessions,
-            "current_session_index": 0,
-            "response": "",
-        }
+        initial_state = DialogueState(
+            memory = None,
+            dialogue_sessions = sessions,
+            current_session_index = 0,
+            response = "")
 
         return self.graph.invoke(initial_state)
