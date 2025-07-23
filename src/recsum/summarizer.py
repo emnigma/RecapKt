@@ -1,5 +1,7 @@
 import abc
 
+from typing import Any
+
 from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
@@ -16,9 +18,9 @@ class RecursiveSummarizer(Summarizer):
     def __init__(self, llm: BaseChatModel, prompt_template: PromptTemplate) -> None:
         self.llm = llm
         self.prompt_template = prompt_template
-        self.chain: Runnable = self._build_chain()
+        self.chain = self._build_chain()
 
-    def _build_chain(self) -> Runnable:
+    def _build_chain(self) -> Runnable[dict[str, Any], str]:
         return self.prompt_template | self.llm | StrOutputParser()
 
     def summarize(self, previous_memory: str, dialogue_context: str) -> str:
