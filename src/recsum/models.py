@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -26,9 +25,9 @@ class Session:
 class DialogueState:
     dialogue_sessions: list[Session]
     current_session_index: int
-    memory: Optional[list[str]]
     query: str
     response: str
+    memory: list[str] = field(default_factory=list)
 
     @property
     def current_context(self) -> Session:
@@ -36,6 +35,6 @@ class DialogueState:
 
     @property
     def latest_memory(self) -> str:
-        if self.memory is None or len(self.memory) == 0:
+        if len(self.memory) == 0:
             return ""
         return self.memory[-1]

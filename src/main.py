@@ -12,23 +12,23 @@ def main() -> None:
         },
         {
             role1: "Murka loves playing with laser pointers.",
-            role2: "Classic! Though I've heard it can frustrate them since they never catch anything. Speaking of\
-             entertainment, do you read much?",
+            role2: "Classic! Though I've heard it can frustrate them since they never catch anything. "
+                   "Speaking of entertainment, do you read much?",
         },
         {
             role1: "I love reading fantasy books.",
-            role2: "Fantasy's hit or miss for me - I prefer sci-fi usually. Are you into any Italian authors? I've been\
-          curious about their literature.",
+            role2: "Fantasy's hit or miss for me - I prefer sci-fi usually. Are you into any Italian authors? "
+                   "I've been curious about their literature.",
         },
         {
             role1: "I'm planning to go to Italy.",
-            role2: "Perfect timing then! I found Rome overwhelming when I visited. You could read some Italian works to\
-           prep for the trip.",
+            role2: "Perfect timing then! I found Rome overwhelming when I visited. "
+                   "You could read some Italian works to prep for the trip.",
         },
         {
             role1: "I love cooking pasta.",
-            role2: "That'll be handy in Italy! I'm terrible at pasta - always turns out mushy. Maybe I should stick to\
-          reading cookbooks instead of using them.",
+            role2: "That'll be handy in Italy! I'm terrible at pasta - always turns out mushy. "
+                   "Maybe I should stick to reading cookbooks instead of using them.",
         },
     ]
 

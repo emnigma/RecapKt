@@ -71,7 +71,6 @@ class DialogueSystem:
 
     def process_dialogue(self, sessions: list[Session], query: str) -> DialogueState:
         initial_state = DialogueState(
-            memory=None,
             dialogue_sessions=sessions,
             current_session_index=0,
             query=query,
