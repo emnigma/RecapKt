@@ -35,7 +35,7 @@ class ConditionalEdge(Enum):
 
 class DialogueSystem:
     def __init__(self, llm: Optional[BaseChatModel] = None) -> None:
-        self.llm = llm or ChatOpenAI(model="gpt-3.5-turbo", temperature=0.0)
+        self.llm = llm or ChatOpenAI(model="gpt-4.1-mini", temperature=0.0)
         self.summarizer = RecursiveSummarizer(self.llm, MEMORY_UPDATE_PROMPT_TEMPLATE)
         self.response_generator = ResponseGenerator(
             self.llm, RESPONSE_GENERATION_PROMPT_TEMPLATE
