@@ -1,20 +1,18 @@
 from typing import Any, List, Optional
 
-from langchain.prompts import PromptTemplate
 from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import Runnable
 from langchain_openai import ChatOpenAI
 
+from src.benchmarking.prompts import BASELINE_PROMPT
 from src.recsum.models import Session
 
 
 class DialogueBaseline:
-    def __init__(
-        self, prompt_template: PromptTemplate, llm: Optional[BaseChatModel] = None
-    ) -> None:
+    def __init__(self, llm: Optional[BaseChatModel] = None) -> None:
         self.llm = llm or ChatOpenAI(model="gpt-4.1-mini", temperature=0.0)
-        self.prompt_template = prompt_template
+        self.prompt_template = BASELINE_PROMPT
         self.chain = self._build_chain()
 
     def _build_chain(self) -> Runnable[dict[str, Any], str]:

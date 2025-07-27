@@ -59,6 +59,7 @@ Evaluate the logical flow and contextual appropriateness of each response. Consi
 For each criterion, choose one of the following:
 - Response 1 is better: Response 1 clearly outperforms Response 2
 - Response 2 is better: Response 2 clearly outperforms Response 1
+- Draw: Both responses are equally good
 
 ## Instructions:
 Evaluate each criterion independently and provide your assessment for all three dimensions. Focus on objective

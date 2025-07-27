@@ -8,13 +8,13 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 @dataclass
-class BERTScoreResult:
+class SemanticSimilarityResult:
     precision: float
     recall: float
     f1: float
 
 
-class BERTScore:
+class SemanticSimilarity:
     def __init__(
         self,
         model: str = "text-embedding-3-small",
@@ -48,15 +48,17 @@ class BERTScore:
 
         return embeddings_array[inverse_indices]
 
-    def compute_bertscore(self, candidate: str, reference: str) -> BERTScoreResult:
+    def compute_similarity(
+        self, candidate: str, reference: str
+    ) -> SemanticSimilarityResult:
         if not candidate or not reference:
-            return BERTScoreResult(0.0, 0.0, 0.0)
+            return SemanticSimilarityResult(0.0, 0.0, 0.0)
 
         cand_tokens = self._tokenize(candidate)
         ref_tokens = self._tokenize(reference)
 
         if len(cand_tokens) == 0 or len(ref_tokens) == 0:
-            return BERTScoreResult(0.0, 0.0, 0.0)
+            return SemanticSimilarityResult(0.0, 0.0, 0.0)
 
         cand_embeddings = self._get_embeddings_batch(cand_tokens)
         ref_embeddings = self._get_embeddings_batch(ref_tokens)
@@ -72,6 +74,6 @@ class BERTScore:
         denominator = precision + recall
         f1 = 2 * precision * recall / denominator if denominator != 0 else 0.0
 
-        return BERTScoreResult(
+        return SemanticSimilarityResult(
             precision=float(precision), recall=float(recall), f1=float(f1)
         )
