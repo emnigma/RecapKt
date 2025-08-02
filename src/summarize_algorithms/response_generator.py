@@ -17,7 +17,7 @@ class ResponseGenerator:
         try:
             response = self.chain.invoke(
                 {
-                    "latest_memory": memory,
+                    "memory": memory,
                     "current_dialogue_context": dialogue_context,
                     "query": query,
                 }

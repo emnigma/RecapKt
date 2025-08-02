@@ -12,7 +12,7 @@ from langgraph.graph.state import CompiledStateGraph
 from src.recsum.graph_nodes import (
     generate_response_node,
     should_continue_memory_update,
-    update_memory_node,
+    update_memory_node, UpdateState,
 )
 from src.recsum.models import DialogueState, Session
 from src.recsum.prompts import (
@@ -20,17 +20,12 @@ from src.recsum.prompts import (
     RESPONSE_GENERATION_PROMPT_TEMPLATE,
 )
 from src.recsum.response_generator import ResponseGenerator
-from src.recsum.summarizer import RecursiveSummarizer
+from src.summarize_algorithms.summarizer import RecursiveSummarizer
 
 
 class WorkflowNode(Enum):
     UPDATE_MEMORY = "update_memory"
     GENERATE_RESPONSE = "generate_response"
-
-
-class ConditionalEdge(Enum):
-    CONTINUE_UPDATE = "continue_update"
-    FINISH_UPDATE = "finish_update"
 
 
 class DialogueSystem:
@@ -60,8 +55,8 @@ class DialogueSystem:
             WorkflowNode.UPDATE_MEMORY.value,
             should_continue_memory_update,
             {
-                ConditionalEdge.CONTINUE_UPDATE.value: WorkflowNode.UPDATE_MEMORY.value,
-                ConditionalEdge.FINISH_UPDATE.value: WorkflowNode.GENERATE_RESPONSE.value,
+                UpdateState.CONTINUE_UPDATE.value: WorkflowNode.UPDATE_MEMORY.value,
+                UpdateState.FINISH_UPDATE.value: WorkflowNode.GENERATE_RESPONSE.value,
             },
         )
 

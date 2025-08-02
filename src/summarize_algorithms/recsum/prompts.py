@@ -91,7 +91,7 @@ Follow these steps:
  Ensure continuity and empathy.
 
 Inputs:
-Memory: {latest_memory}
+Memory: {memory}
 Dialogue Context: {current_dialogue_context}
 Query: {query}
 

@@ -1,17 +1,9 @@
 import math
 
-from dataclasses import dataclass
-
 import faiss
 import numpy as np
 
 from langchain_openai import OpenAIEmbeddings
-
-
-@dataclass
-class MemoryFragment:
-    content: str
-    session_id: int
 
 
 class MemoryStorage:
@@ -21,7 +13,7 @@ class MemoryStorage:
         batch_size: int = 100,
         max_session_id: int = 3,
     ) -> None:
-        self.memory_list: list[MemoryFragment] = []
+        self.memory_list: list[str] = []
         self.embeddings = OpenAIEmbeddings(model=model, chunk_size=batch_size)
         self.max_session_id = max_session_id
         self.index = None
@@ -57,9 +49,9 @@ class MemoryStorage:
         self.index.add(weighted_embeddings)
 
         for content in memories:
-            self.memory_list.append(MemoryFragment(content, session_id))
+            self.memory_list.append(content)
 
-    def find_similar(self, query: str, top_k: int = 5) -> list[MemoryFragment]:
+    def find_similar(self, query: str, top_k: int = 5) -> list[str]:
         if self.index is None or len(self.memory_list) == 0:
             return []
 

@@ -1,4 +1,7 @@
 from dataclasses import dataclass, field
+from enum import Enum
+
+from src.summarize_algorithms.memory_bank.memory_storage import MemoryStorage
 
 
 @dataclass
@@ -24,17 +27,29 @@ class Session:
 @dataclass
 class DialogueState:
     dialogue_sessions: list[Session]
-    current_session_index: int
     query: str
-    response: str
-    memory: list[str] = field(default_factory=list)
+    current_session_index: int = 0
+    response: str = ""
 
     @property
     def current_context(self) -> Session:
         return self.dialogue_sessions[-1]
 
+
+@dataclass
+class RecsumDialogueState(DialogueState):
+    memory: list[str] = field(default_factory=list)
+
     @property
     def latest_memory(self) -> str:
-        if len(self.memory) == 0:
-            return ""
-        return self.memory[-1]
+        return self.memory[-1] if self.memory else ""
+
+
+@dataclass
+class MemoryBankDialogueState(DialogueState):
+    memory_storage: MemoryStorage = field(default_factory=MemoryStorage)
+
+
+class WorkflowNode(Enum):
+    UPDATE_MEMORY = "update_memory"
+    GENERATE_RESPONSE = "generate_response"
