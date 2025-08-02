@@ -1,14 +1,17 @@
 from langchain_core.prompts import PromptTemplate
 
-BASELINE_PROMPT = PromptTemplate.from_template("""
+BASELINE_PROMPT = PromptTemplate.from_template(
+    """
 You are an advanced AI language model capable of engaging in personality-based conversations.
 Respond to the user based on the provided dialogue context. Craft a response that is natural and
 conversational.
 Dialog context: {context}
 Query: {query}
-The response to user is:""")
+The response to user is:"""
+)
 
-SINGLE_EVALUATION_PROMPT = PromptTemplate.from_template("""
+SINGLE_EVALUATION_PROMPT = PromptTemplate.from_template(
+    """
 You are an impartial judge. You will be shown a Conversation Context, Personality of Speakers and Assistant Response.
 #Faithfulness: Please evaluate whether the Assistant's response accurately represents the information provided in the
  conversation context and persona, without introducing false or misleading information.
@@ -21,9 +24,11 @@ Conversation Context: {context}
 Personality: {memory}
 Assistant Response: {response}
 Begin your evaluation by providing a short explanation, then you must rate the Assistant Response
- on an integer score of 1 (very bad) to 100 (very good).""")
+ on an integer score of 1 (very bad) to 100 (very good)."""
+)
 
-PAIRWISE_EVALUATION_PROMPT = PromptTemplate.from_template("""
+PAIRWISE_EVALUATION_PROMPT = PromptTemplate.from_template(
+    """
 You are an expert evaluator tasked with comparing two AI assistant responses. You will evaluate them across three
  specific criteria and determine which response is better for each criterion.
 ## Input Information:
@@ -64,4 +69,5 @@ For each criterion, choose one of the following:
 ## Instructions:
 Evaluate each criterion independently and provide your assessment for all three dimensions. Focus on objective
  evaluation based on the specific criteria rather than general preferences.
-""")
+"""
+)

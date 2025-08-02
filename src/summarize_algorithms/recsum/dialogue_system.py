@@ -1,6 +1,5 @@
 import functools
 
-from enum import Enum
 from typing import Optional
 
 from langchain_core.language_models import BaseChatModel
@@ -9,23 +8,19 @@ from langgraph.constants import END
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from src.recsum.graph_nodes import (
-    generate_response_node,
+from src.summarize_algorithms.graph_nodes import (
+    UpdateState,
+    generate_response_node_recsum,
     should_continue_memory_update,
-    update_memory_node, UpdateState,
+    update_memory_node,
 )
-from src.recsum.models import DialogueState, Session
-from src.recsum.prompts import (
+from src.summarize_algorithms.models import RecsumDialogueState, Session, WorkflowNode
+from src.summarize_algorithms.recsum.prompts import (
     MEMORY_UPDATE_PROMPT_TEMPLATE,
     RESPONSE_GENERATION_PROMPT_TEMPLATE,
 )
-from src.recsum.response_generator import ResponseGenerator
-from src.summarize_algorithms.summarizer import RecursiveSummarizer
-
-
-class WorkflowNode(Enum):
-    UPDATE_MEMORY = "update_memory"
-    GENERATE_RESPONSE = "generate_response"
+from src.summarize_algorithms.recsum.summarizer import RecursiveSummarizer
+from src.summarize_algorithms.response_generator import ResponseGenerator
 
 
 class DialogueSystem:
@@ -38,7 +33,7 @@ class DialogueSystem:
         self.graph = self._build_graph()
 
     def _build_graph(self) -> CompiledStateGraph:
-        workflow = StateGraph(DialogueState)
+        workflow = StateGraph(RecsumDialogueState)
 
         workflow.add_node(
             WorkflowNode.UPDATE_MEMORY.value,
@@ -46,7 +41,7 @@ class DialogueSystem:
         )
         workflow.add_node(
             WorkflowNode.GENERATE_RESPONSE.value,
-            functools.partial(generate_response_node, self.response_generator),
+            functools.partial(generate_response_node_recsum, self.response_generator),
         )
 
         workflow.set_entry_point(WorkflowNode.UPDATE_MEMORY.value)
@@ -64,12 +59,14 @@ class DialogueSystem:
 
         return workflow.compile()
 
-    def process_dialogue(self, sessions: list[Session], query: str) -> DialogueState:
-        initial_state = DialogueState(
+    def process_dialogue(
+        self, sessions: list[Session], query: str
+    ) -> RecsumDialogueState:
+        initial_state = RecsumDialogueState(
             dialogue_sessions=sessions,
             current_session_index=0,
             query=query,
             response="",
         )
 
-        return DialogueState(**self.graph.invoke(initial_state))
+        return RecsumDialogueState(**self.graph.invoke(initial_state))

@@ -1,0 +1,2 @@
+[console_scripts]
+recapkt = src.main:main

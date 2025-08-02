@@ -4,7 +4,7 @@ from typing import Any
 
 from datasets import load_dataset
 
-from src.recsum.models import Message, Session
+from src.summarize_algorithms.models import Message, Session
 
 
 class MCPDataset:

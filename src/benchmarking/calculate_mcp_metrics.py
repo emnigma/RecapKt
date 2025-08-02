@@ -14,7 +14,7 @@ from src.benchmarking.baseline import DialogueBaseline
 from src.benchmarking.deserialize_mcp_data import MCPDataset
 from src.benchmarking.llm_evaluation import ComparisonResult, LLMEvaluation
 from src.benchmarking.semantic_similarity import SemanticSimilarity
-from src.recsum.dialogue_system import DialogueSystem
+from src.summarize_algorithms.memory_bank.dialogue_system import DialogueSystem
 
 
 @dataclass

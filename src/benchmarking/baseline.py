@@ -6,7 +6,7 @@ from langchain_core.runnables import Runnable
 from langchain_openai import ChatOpenAI
 
 from src.benchmarking.prompts import BASELINE_PROMPT
-from src.recsum.models import Session
+from src.summarize_algorithms.models import Session
 
 
 class DialogueBaseline:
