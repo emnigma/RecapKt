@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.recsum.summarizer import RecursiveSummarizer
+from src.summarize_algorithms.recsum.summarizer import RecursiveSummarizer
 
 
 @pytest.fixture

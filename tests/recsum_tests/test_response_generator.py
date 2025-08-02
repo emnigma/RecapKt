@@ -5,7 +5,7 @@ import pytest
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import PromptTemplate
 
-from src.recsum.response_generator import ResponseGenerator
+from src.summarize_algorithms.response_generator import ResponseGenerator
 
 
 @pytest.fixture
@@ -43,7 +43,7 @@ def test_generate_response_success(response_generator):
     assert result == "Test response"
     mock_chain.invoke.assert_called_once_with(
         {
-            "latest_memory": "Memory content",
+            "memory": "Memory content",
             "current_dialogue_context": "Dialogue history",
             "query": "User question",
         }
@@ -66,7 +66,7 @@ def test_argument_combinations(response_generator, memory, context, query):
 
     response_generator.generate_response(memory, context, query)
     mock_chain.invoke.assert_called_once_with(
-        {"latest_memory": memory, "current_dialogue_context": context, "query": query}
+        {"memory": memory, "current_dialogue_context": context, "query": query}
     )
 
 
