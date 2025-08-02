@@ -53,3 +53,8 @@ class MemoryBankDialogueState(DialogueState):
 class WorkflowNode(Enum):
     UPDATE_MEMORY = "update_memory"
     GENERATE_RESPONSE = "generate_response"
+
+
+class UpdateState(Enum):
+    CONTINUE_UPDATE = "continue_update"
+    FINISH_UPDATE = "finish_update"

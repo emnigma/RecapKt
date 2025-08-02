@@ -1,27 +1,14 @@
-import abc
-
 from typing import Any
 
-from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import Runnable
 
-
-class Summarizer(abc.ABC):
-    @abc.abstractmethod
-    def summarize(self, previous_memory: str, dialogue_context: str) -> str:
-        pass
+from src.summarize_algorithms.core.base_summarizer import BaseSummarizer
 
 
-class RecursiveSummarizer(Summarizer):
-    def __init__(self, llm: BaseChatModel, prompt_template: PromptTemplate) -> None:
-        self.llm = llm
-        self.prompt_template = prompt_template
-        self.chain = self._build_chain()
-
+class RecursiveSummarizer(BaseSummarizer):
     def _build_chain(self) -> Runnable[dict[str, Any], str]:
-        return self.prompt_template | self.llm | StrOutputParser()
+        return self.prompt | self.llm | StrOutputParser()
 
     def summarize(self, previous_memory: str, dialogue_context: str) -> str:
         try:

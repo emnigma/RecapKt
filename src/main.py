@@ -1,5 +1,5 @@
+from src.summarize_algorithms.core.models import Message, Session
 from src.summarize_algorithms.memory_bank.dialogue_system import DialogueSystem
-from src.summarize_algorithms.models import Message, Session
 
 
 def main() -> None:
@@ -43,7 +43,6 @@ def main() -> None:
 
     result = system.process_dialogue(sessions, current_query)
 
-    print(f"Memory: {result.memory_storage.memory_list}")
     print(f"Response: {result.response}")
 
 
