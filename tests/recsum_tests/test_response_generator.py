@@ -5,7 +5,7 @@ import pytest
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import PromptTemplate
 
-from src.summarize_algorithms.response_generator import ResponseGenerator
+from src.summarize_algorithms.core.response_generator import ResponseGenerator
 
 
 @pytest.fixture

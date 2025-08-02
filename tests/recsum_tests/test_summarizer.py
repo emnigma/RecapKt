@@ -17,12 +17,11 @@ def mock_prompt_template():
 
 @pytest.fixture
 def summarizer(mock_llm, mock_prompt_template):
-    return RecursiveSummarizer(llm=mock_llm, prompt_template=mock_prompt_template)
+    return RecursiveSummarizer(llm=mock_llm, prompt=mock_prompt_template)
 
 
 def test_initialization(summarizer, mock_llm, mock_prompt_template):
     assert summarizer.llm is mock_llm
-    assert summarizer.prompt_template is mock_prompt_template
     assert hasattr(summarizer, "chain")
 
 
