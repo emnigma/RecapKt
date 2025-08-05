@@ -1,49 +1,53 @@
 import functools
 
-from enum import Enum
-from typing import Optional
+from abc import ABC, abstractmethod
+from typing import Any, Optional, Type
 
 from langchain_core.language_models import BaseChatModel
+from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langgraph.constants import END
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from src.recsum.graph_nodes import (
+from src.summarize_algorithms.core.graph_nodes import (
+    UpdateState,
     generate_response_node,
     should_continue_memory_update,
     update_memory_node,
 )
-from src.recsum.models import DialogueState, Session
-from src.recsum.prompts import (
-    MEMORY_UPDATE_PROMPT_TEMPLATE,
-    RESPONSE_GENERATION_PROMPT_TEMPLATE,
-)
-from src.recsum.response_generator import ResponseGenerator
-from src.recsum.summarizer import RecursiveSummarizer
+from src.summarize_algorithms.core.models import DialogueState, Session, WorkflowNode
+from src.summarize_algorithms.core.response_generator import ResponseGenerator
 
 
-class WorkflowNode(Enum):
-    UPDATE_MEMORY = "update_memory"
-    GENERATE_RESPONSE = "generate_response"
-
-
-class ConditionalEdge(Enum):
-    CONTINUE_UPDATE = "continue_update"
-    FINISH_UPDATE = "finish_update"
-
-
-class DialogueSystem:
+class BaseDialogueSystem(ABC):
     def __init__(self, llm: Optional[BaseChatModel] = None) -> None:
         self.llm = llm or ChatOpenAI(model="gpt-4.1-mini", temperature=0.0)
-        self.summarizer = RecursiveSummarizer(self.llm, MEMORY_UPDATE_PROMPT_TEMPLATE)
+        self.summarizer = self._build_summarizer()
         self.response_generator = ResponseGenerator(
-            self.llm, RESPONSE_GENERATION_PROMPT_TEMPLATE
+            self.llm, self._get_response_prompt_template()
         )
         self.graph = self._build_graph()
 
+    @abstractmethod
+    def _build_summarizer(self) -> Any:
+        pass
+
+    @abstractmethod
+    def _get_response_prompt_template(self) -> PromptTemplate:
+        pass
+
+    @abstractmethod
+    def _get_initial_state(self, sessions: list[Session], query: str) -> DialogueState:
+        pass
+
+    @property
+    @abstractmethod
+    def _get_dialogue_state_class(self) -> Type[DialogueState]:
+        pass
+
     def _build_graph(self) -> CompiledStateGraph:
-        workflow = StateGraph(DialogueState)
+        workflow = StateGraph(self._get_dialogue_state_class)
 
         workflow.add_node(
             WorkflowNode.UPDATE_MEMORY.value,
@@ -60,8 +64,8 @@ class DialogueSystem:
             WorkflowNode.UPDATE_MEMORY.value,
             should_continue_memory_update,
             {
-                ConditionalEdge.CONTINUE_UPDATE.value: WorkflowNode.UPDATE_MEMORY.value,
-                ConditionalEdge.FINISH_UPDATE.value: WorkflowNode.GENERATE_RESPONSE.value,
+                UpdateState.CONTINUE_UPDATE.value: WorkflowNode.UPDATE_MEMORY.value,
+                UpdateState.FINISH_UPDATE.value: WorkflowNode.GENERATE_RESPONSE.value,
             },
         )
 
@@ -70,11 +74,5 @@ class DialogueSystem:
         return workflow.compile()
 
     def process_dialogue(self, sessions: list[Session], query: str) -> DialogueState:
-        initial_state = DialogueState(
-            dialogue_sessions=sessions,
-            current_session_index=0,
-            query=query,
-            response="",
-        )
-
-        return DialogueState(**self.graph.invoke(initial_state))
+        initial_state = self._get_initial_state(sessions, query)
+        return self._get_dialogue_state_class(**self.graph.invoke(initial_state))
