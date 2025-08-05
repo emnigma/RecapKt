@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
-
-from src.summarize_algorithms.memory_bank.memory_storage import MemoryStorage
+from typing import Optional
 
 
 @dataclass
@@ -29,7 +28,13 @@ class DialogueState:
     dialogue_sessions: list[Session]
     query: str
     current_session_index: int = 0
-    response: str = ""
+    _response: Optional[str] = None
+
+    @property
+    def response(self) -> str:
+        if self._response is None:
+            raise ValueError("Response has not been generated yet.")
+        return self._response
 
     @property
     def current_context(self) -> Session:
@@ -43,11 +48,6 @@ class RecsumDialogueState(DialogueState):
     @property
     def latest_memory(self) -> str:
         return "\n".join(self.memory[-1]) if self.memory else ""
-
-
-@dataclass
-class MemoryBankDialogueState(DialogueState):
-    memory_storage: MemoryStorage = field(default_factory=MemoryStorage)
 
 
 class WorkflowNode(Enum):

@@ -1,11 +1,11 @@
 from src.summarize_algorithms.core.base_summarizer import BaseSummarizer
 from src.summarize_algorithms.core.models import (
     DialogueState,
-    MemoryBankDialogueState,
     RecsumDialogueState,
     UpdateState,
 )
 from src.summarize_algorithms.core.response_generator import ResponseGenerator
+from src.summarize_algorithms.memory_bank.dialogue_system import MemoryBankDialogueState
 
 
 def update_memory_node(
@@ -54,7 +54,7 @@ def generate_response_node(
             f"Unsupported status type for update_memory_node: {type(state)}"
         )
 
-    state.response = final_response
+    state._response = final_response
     return state
 
 

@@ -1,10 +1,12 @@
 import math
 
 from dataclasses import dataclass
+from typing import Optional
 
 import faiss
 import numpy as np
 
+from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 
 
@@ -17,12 +19,13 @@ class MemoryFragment:
 class MemoryStorage:
     def __init__(
         self,
-        model: str = "text-embedding-3-small",
-        batch_size: int = 100,
+        embeddings: Optional[Embeddings] = None,
         max_session_id: int = 3,
     ) -> None:
         self.memory_list: list[MemoryFragment] = []
-        self.embeddings = OpenAIEmbeddings(model=model, chunk_size=batch_size)
+        self.embeddings = embeddings or OpenAIEmbeddings(
+            model="text-embedding-3-small", chunk_size=100
+        )
         self.max_session_id = max_session_id
         self.index = None
         self._is_initialized = False
