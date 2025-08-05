@@ -14,7 +14,7 @@ from src.benchmarking.baseline import DialogueBaseline
 from src.benchmarking.deserialize_mcp_data import MCPDataset
 from src.benchmarking.llm_evaluation import ComparisonResult, LLMEvaluation
 from src.benchmarking.semantic_similarity import SemanticSimilarity
-from src.summarize_algorithms.memory_bank.dialogue_system import DialogueSystem
+from src.summarize_algorithms.memory_bank.dialogue_system import RecsumDialogueSystem
 
 
 @dataclass
@@ -82,7 +82,7 @@ class PairwiseResults:
 
 
 @dataclass
-class MCPResults:
+class MCPResponseResults:
     metadata: Dict[str, Any] = field(default_factory=dict)
     recsum_results: SystemResults = field(default_factory=SystemResults)
     baseline_results: SystemResults = field(default_factory=SystemResults)
@@ -92,10 +92,10 @@ class MCPResults:
         return asdict(self)
 
 
-class CalculateMCPMetrics:
+class CalculateMCPResponseMetrics:
     def __init__(self, n_samples: int = 30):
         self.dataset = MCPDataset(n_samples)
-        self.recsum = DialogueSystem()
+        self.recsum = RecsumDialogueSystem()
         self.baseline = DialogueBaseline()
         self.semantic_scorer = SemanticSimilarity()
         self.llm_scorer = LLMEvaluation()
@@ -112,10 +112,10 @@ class CalculateMCPMetrics:
         self._is_calculated = False
 
     @property
-    def results(self) -> MCPResults:
+    def results(self) -> MCPResponseResults:
         if not self._is_calculated:
             self.calculate()
-        return MCPResults(
+        return MCPResponseResults(
             metadata={
                 "timestamp": datetime.now().isoformat(),
                 "n_samples": self.n_samples,
@@ -284,7 +284,7 @@ class CalculateMCPMetrics:
         self._print_llm_single_results(results)
         self._print_llm_pairwise_results(results)
 
-    def _print_semantic_results(self, results: MCPResults) -> None:
+    def _print_semantic_results(self, results: MCPResponseResults) -> None:
         print("=" * 50)
         print("SEMANTIC EVALUATION RESULTS")
         print("=" * 50)
@@ -306,7 +306,7 @@ class CalculateMCPMetrics:
         )
         print()
 
-    def _print_llm_single_results(self, results: MCPResults) -> None:
+    def _print_llm_single_results(self, results: MCPResponseResults) -> None:
         print("=" * 50)
         print("LLM SINGLE EVALUATION RESULTS")
         print("=" * 50)
@@ -328,7 +328,7 @@ class CalculateMCPMetrics:
         )
         print()
 
-    def _print_llm_pairwise_results(self, results: MCPResults) -> None:
+    def _print_llm_pairwise_results(self, results: MCPResponseResults) -> None:
         total_count = results.pairwise_results.get_total_count()
 
         if total_count == 0:
@@ -355,7 +355,7 @@ class CalculateMCPMetrics:
 
 
 def main() -> None:
-    metric_calculator = CalculateMCPMetrics()
+    metric_calculator = CalculateMCPResponseMetrics()
 
     print("Starting MCP metrics calculation...")
     metric_calculator.calculate()
