@@ -5,3 +5,6 @@ __pycache__/
 .ipynb_checkpoints/
 .hypothesis/
 *.egg-info/
+build/
+.venv/
+uv.lock
