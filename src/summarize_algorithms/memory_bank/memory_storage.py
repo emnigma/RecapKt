@@ -1,9 +1,17 @@
 import math
 
+from dataclasses import dataclass
+
 import faiss
 import numpy as np
 
 from langchain_openai import OpenAIEmbeddings
+
+
+@dataclass
+class MemoryFragment:
+    message: str
+    session_id: int
 
 
 class MemoryStorage:
@@ -13,7 +21,7 @@ class MemoryStorage:
         batch_size: int = 100,
         max_session_id: int = 3,
     ) -> None:
-        self.memory_list: list[str] = []
+        self.memory_list: list[MemoryFragment] = []
         self.embeddings = OpenAIEmbeddings(model=model, chunk_size=batch_size)
         self.max_session_id = max_session_id
         self.index = None
@@ -49,7 +57,7 @@ class MemoryStorage:
         self.index.add(weighted_embeddings)
 
         for content in memories:
-            self.memory_list.append(content)
+            self.memory_list.append(MemoryFragment(content, session_id))
 
     def find_similar(self, query: str, top_k: int = 5) -> list[str]:
         if self.index is None or len(self.memory_list) == 0:
@@ -66,9 +74,21 @@ class MemoryStorage:
 
         results = []
         for idx in indices[0]:
-            results.append(self.memory_list[idx])
+            results.append(self.memory_list[idx].message)
 
         return results
 
     def get_memory_count(self) -> int:
         return len(self.memory_list)
+
+    def get_session_memory(self, session_id: int) -> list[str]:
+        if session_id < 0 or session_id >= self.max_session_id:
+            raise ValueError(
+                f"Session ID must be between 0 and {self.max_session_id - 1}."
+            )
+
+        return [
+            fragment.message
+            for fragment in self.memory_list
+            if fragment.session_id == session_id
+        ]

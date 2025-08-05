@@ -1,16 +1,19 @@
-from typing import Any
+from typing import Any, cast
 
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import Runnable
+from langchain_core.runnables import RunnableSerializable
 
 from src.summarize_algorithms.core.base_summarizer import BaseSummarizer
+from src.summarize_algorithms.memory_bank.summarizer import SessionMemory
 
 
 class RecursiveSummarizer(BaseSummarizer):
-    def _build_chain(self) -> Runnable[dict[str, Any], str]:
-        return self.prompt | self.llm | StrOutputParser()
+    def _build_chain(self) -> RunnableSerializable[dict[str, Any], SessionMemory]:
+        return cast(
+            RunnableSerializable[dict, SessionMemory],
+            self.prompt | self.llm.with_structured_output(SessionMemory),
+        )
 
-    def summarize(self, previous_memory: str, dialogue_context: str) -> str:
+    def summarize(self, previous_memory: str, dialogue_context: str) -> list[str]:
         try:
             response = self.chain.invoke(
                 {
@@ -18,6 +21,6 @@ class RecursiveSummarizer(BaseSummarizer):
                     "dialogue_context": dialogue_context,
                 }
             )
-            return response
+            return response.summary_messages
         except Exception as e:
             raise ConnectionError(f"API request failed: {e}") from e

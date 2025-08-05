@@ -12,7 +12,7 @@ from src.summarize_algorithms.memory_bank.prompts import (
 from src.summarize_algorithms.memory_bank.summarizer import SessionSummarizer
 
 
-class DialogueSystem(BaseDialogueSystem):
+class RecsumDialogueSystem(BaseDialogueSystem):
     def __init__(self, llm: Optional[BaseChatModel] = None) -> None:
         super().__init__(llm)
 

@@ -38,11 +38,11 @@ class DialogueState:
 
 @dataclass
 class RecsumDialogueState(DialogueState):
-    memory: list[str] = field(default_factory=list)
+    memory: list[list[str]] = field(default_factory=list)
 
     @property
     def latest_memory(self) -> str:
-        return self.memory[-1] if self.memory else ""
+        return "\n".join(self.memory[-1]) if self.memory else ""
 
 
 @dataclass

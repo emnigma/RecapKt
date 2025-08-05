@@ -1,5 +1,5 @@
 from src.summarize_algorithms.core.models import Message, Session
-from src.summarize_algorithms.memory_bank.dialogue_system import DialogueSystem
+from src.summarize_algorithms.memory_bank.dialogue_system import RecsumDialogueSystem
 
 
 def main() -> None:
@@ -34,7 +34,7 @@ def main() -> None:
 
     current_query = "What would you recommend for me to read?"
 
-    system = DialogueSystem()
+    system = RecsumDialogueSystem()
 
     sessions = []
     for data in past_dialogue_sessions_data:
