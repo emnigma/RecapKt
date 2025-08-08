@@ -28,6 +28,7 @@ class BaseDialogueSystem(ABC):
             self.llm, self._get_response_prompt_template()
         )
         self.graph = self._build_graph()
+        self.state: Optional[DialogueState] = None
 
     @abstractmethod
     def _build_summarizer(self) -> Any:
@@ -75,4 +76,5 @@ class BaseDialogueSystem(ABC):
 
     def process_dialogue(self, sessions: list[Session], query: str) -> DialogueState:
         initial_state = self._get_initial_state(sessions, query)
-        return self._get_dialogue_state_class(**self.graph.invoke(initial_state))
+        self.state = self._get_dialogue_state_class(**self.graph.invoke(initial_state))
+        return self.state if self.state is not None else initial_state

@@ -53,7 +53,7 @@ class MemoryStorage:
 
         normalized_embeddings = self._normalize_vectors(embeddings_array)
 
-        importance = math.exp(-0.2 * (1 - (session_id / self.max_session_id)))
+        importance = math.exp(-0.2 * (1 - (session_id + 1 / self.max_session_id)))
 
         weighted_embeddings = normalized_embeddings * importance
 

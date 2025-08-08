@@ -5,12 +5,15 @@ from src.summarize_algorithms.core.models import (
     UpdateState,
 )
 from src.summarize_algorithms.core.response_generator import ResponseGenerator
-from src.summarize_algorithms.memory_bank.dialogue_system import MemoryBankDialogueState
 
 
 def update_memory_node(
     summarizer_instance: BaseSummarizer, state: DialogueState
 ) -> DialogueState:
+    from src.summarize_algorithms.memory_bank.dialogue_system import (
+        MemoryBankDialogueState,
+    )
+
     current_dialogue_session = state.dialogue_sessions[state.current_session_index]
 
     if isinstance(state, RecsumDialogueState):
@@ -36,6 +39,10 @@ def update_memory_node(
 def generate_response_node(
     response_generator_instance: ResponseGenerator, state: DialogueState
 ) -> DialogueState:
+    from src.summarize_algorithms.memory_bank.dialogue_system import (
+        MemoryBankDialogueState,
+    )
+
     if isinstance(state, RecsumDialogueState):
         final_response = response_generator_instance.generate_response(
             state.latest_memory, str(state.dialogue_sessions[-1]), state.query

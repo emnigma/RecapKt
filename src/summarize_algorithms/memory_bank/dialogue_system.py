@@ -20,14 +20,16 @@ class MemoryBankDialogueState(DialogueState):
     memory_storage: MemoryStorage = field(default_factory=MemoryStorage)
 
 
-class RecsumDialogueSystem(BaseDialogueSystem):
+class MemoryBankDialogueSystem(BaseDialogueSystem):
     def __init__(
         self,
         llm: Optional[BaseChatModel] = None,
         embed_model: Optional[Embeddings] = None,
+        max_session_id: int = 3,
     ) -> None:
         super().__init__(llm)
         self.embed_model = embed_model
+        self.max_session_id = max_session_id
 
     def _build_summarizer(self) -> SessionSummarizer:
         return SessionSummarizer(self.llm, SESSION_SUMMARY_PROMPT)
@@ -41,7 +43,9 @@ class RecsumDialogueSystem(BaseDialogueSystem):
         return MemoryBankDialogueState(
             dialogue_sessions=sessions,
             query=query,
-            memory_storage=MemoryStorage(embeddings=self.embed_model),
+            memory_storage=MemoryStorage(
+                embeddings=self.embed_model, max_session_id=self.max_session_id
+            ),
         )
 
     @property
