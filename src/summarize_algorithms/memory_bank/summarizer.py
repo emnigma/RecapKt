@@ -4,10 +4,11 @@ from langchain_core.runnables import RunnableSerializable
 from pydantic import BaseModel, Field
 
 from src.summarize_algorithms.core.base_summarizer import BaseSummarizer
+from src.summarize_algorithms.core.models import BaseBlock
 
 
 class SessionMemory(BaseModel):
-    summary_messages: list[str] = Field(description="Summary of session messages")
+    summary_messages: list[BaseBlock] = Field(description="Summary of session messages")
 
 
 class SessionSummarizer(BaseSummarizer):
@@ -17,7 +18,7 @@ class SessionSummarizer(BaseSummarizer):
             self.prompt | self.llm.with_structured_output(SessionMemory),
         )
 
-    def summarize(self, session_messages: str, session_id: int) -> list[str]:
+    def summarize(self, session_messages: str, session_id: int) -> list[BaseBlock]:
         try:
             response = self.chain.invoke(
                 {

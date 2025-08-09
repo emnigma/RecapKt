@@ -3,6 +3,7 @@ from typing import Any, cast
 from langchain_core.runnables import RunnableSerializable
 
 from src.summarize_algorithms.core.base_summarizer import BaseSummarizer
+from src.summarize_algorithms.core.models import BaseBlock
 from src.summarize_algorithms.memory_bank.summarizer import SessionMemory
 
 
@@ -13,7 +14,7 @@ class RecursiveSummarizer(BaseSummarizer):
             self.prompt | self.llm.with_structured_output(SessionMemory),
         )
 
-    def summarize(self, previous_memory: str, dialogue_context: str) -> list[str]:
+    def summarize(self, previous_memory: str, dialogue_context: str) -> list[BaseBlock]:
         try:
             response = self.chain.invoke(
                 {

@@ -13,12 +13,15 @@ class ResponseGenerator:
     def _build_chain(self) -> Runnable:
         return self.prompt_template | self.llm | StrOutputParser()
 
-    def generate_response(self, memory: str, dialogue_context: str, query: str) -> str:
+    def generate_response(
+        self, dialogue_memory: str, code_memory: str, tool_memory: str, query: str
+    ) -> str:
         try:
             response = self.chain.invoke(
                 {
-                    "memory": memory,
-                    "current_dialogue_context": dialogue_context,
+                    "dialogue_memory": dialogue_memory,
+                    "code_memory": code_memory,
+                    "tool_memory": tool_memory,
                     "query": query,
                 }
             )

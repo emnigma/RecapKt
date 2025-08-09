@@ -1,7 +1,7 @@
 import math
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Iterable, Optional
 
 import faiss
 import numpy as np
@@ -9,10 +9,13 @@ import numpy as np
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 
+from src.summarize_algorithms.core.models import BaseBlock, CodeBlock
+
 
 @dataclass
 class MemoryFragment:
-    message: str
+    embed_content: str
+    content: str
     session_id: int
 
 
@@ -42,8 +45,13 @@ class MemoryStorage:
         norms = np.where(norms == 0, 1, norms)
         return vectors / norms
 
-    def add_memory(self, memories: list[str], session_id: int) -> None:
-        embeddings_list = self.embeddings.embed_documents(memories)
+    def add_memory(self, memories: Iterable[BaseBlock], session_id: int) -> None:
+        if not memories:
+            return
+
+        memory_embed_contents = [block.content for block in memories]
+
+        embeddings_list = self.embeddings.embed_documents(memory_embed_contents)
         embeddings_array = np.array(embeddings_list, dtype=np.float32)
 
         self._initialize_index(embeddings_array.shape[1])
@@ -53,14 +61,23 @@ class MemoryStorage:
 
         normalized_embeddings = self._normalize_vectors(embeddings_array)
 
-        importance = math.exp(-0.2 * (1 - (session_id + 1 / self.max_session_id)))
+        importance = math.exp(-0.2 * (1 - (session_id + 1 / self.max_session_id + 1)))
 
         weighted_embeddings = normalized_embeddings * importance
 
         self.index.add(weighted_embeddings)
 
-        for content in memories:
-            self.memory_list.append(MemoryFragment(content, session_id))
+        for memory in memories:
+            if isinstance(memory, CodeBlock):
+                content = memory.code
+            else:
+                content = memory.content
+
+            self.memory_list.append(
+                MemoryFragment(
+                    embed_content=memory.content, content=content, session_id=session_id
+                )
+            )
 
     def find_similar(self, query: str, top_k: int = 5) -> list[str]:
         if self.index is None or len(self.memory_list) == 0:
@@ -77,7 +94,7 @@ class MemoryStorage:
 
         results = []
         for idx in indices[0]:
-            results.append(self.memory_list[idx].message)
+            results.append(self.memory_list[idx].content)
 
         return results
 
@@ -91,7 +108,7 @@ class MemoryStorage:
             )
 
         return [
-            fragment.message
+            fragment.content
             for fragment in self.memory_list
             if fragment.session_id == session_id
         ]

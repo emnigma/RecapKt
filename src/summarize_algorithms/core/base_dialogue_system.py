@@ -3,6 +3,7 @@ import functools
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Type
 
+from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
@@ -17,11 +18,19 @@ from src.summarize_algorithms.core.graph_nodes import (
     update_memory_node,
 )
 from src.summarize_algorithms.core.models import DialogueState, Session, WorkflowNode
+from src.summarize_algorithms.core.prompts import RESPONSE_GENERATION_PROMPT
 from src.summarize_algorithms.core.response_generator import ResponseGenerator
 
 
 class BaseDialogueSystem(ABC):
-    def __init__(self, llm: Optional[BaseChatModel] = None) -> None:
+    def __init__(
+        self,
+        llm: Optional[BaseChatModel] = None,
+        embed_code: bool = False,
+        embed_tool: bool = False,
+        embed_model: Optional[Embeddings] = None,
+        max_session_id: int = 3,
+    ) -> None:
         self.llm = llm or ChatOpenAI(model="gpt-4.1-mini", temperature=0.0)
         self.summarizer = self._build_summarizer()
         self.response_generator = ResponseGenerator(
@@ -29,14 +38,18 @@ class BaseDialogueSystem(ABC):
         )
         self.graph = self._build_graph()
         self.state: Optional[DialogueState] = None
+        self.embed_code = embed_code
+        self.embed_tool = embed_tool
+        self.embed_model = embed_model
+        self.max_session_id = max_session_id
 
     @abstractmethod
     def _build_summarizer(self) -> Any:
         pass
 
-    @abstractmethod
-    def _get_response_prompt_template(self) -> PromptTemplate:
-        pass
+    @staticmethod
+    def _get_response_prompt_template() -> PromptTemplate:
+        return RESPONSE_GENERATION_PROMPT
 
     @abstractmethod
     def _get_initial_state(self, sessions: list[Session], query: str) -> DialogueState:
