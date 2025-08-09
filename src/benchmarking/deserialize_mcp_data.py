@@ -5,7 +5,7 @@ from typing import Any
 
 from datasets import load_dataset
 
-from src.summarize_algorithms.core.models import Message, Session
+from src.summarize_algorithms.core.models import BaseBlock, Session
 
 
 @dataclass
@@ -88,7 +88,7 @@ class MCPDataset:
 
         for dialogue_msgs, speakers in zip(dialogue_sessions, speaker_sessions):
             messages = [
-                Message(role=speaker, message=message)
+                BaseBlock(role=speaker, content=message)
                 for message, speaker in zip(dialogue_msgs, speakers)
             ]
             sessions.append(Session(messages))

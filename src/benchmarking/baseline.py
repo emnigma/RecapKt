@@ -22,7 +22,7 @@ class DialogueBaseline:
         context_messages = []
         for session in sessions:
             for message in session.messages:
-                context_messages.append(f"{message.role}: {message.message}")
+                context_messages.append(f"{message.role}: {message.content}")
         context = "\n".join(context_messages)
 
         result = self.chain.invoke({"context": context, "query": query})

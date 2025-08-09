@@ -1,26 +1,51 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import Iterator, Optional
 
 
 @dataclass
-class Message:
+class BaseBlock:
     role: str
-    message: str
-
-    def __str__(self) -> str:
-        return f"{self.role}: {self.message}"
+    content: str
 
 
 @dataclass
+class CodeBlock(BaseBlock):
+    code: str
+
+
+@dataclass
+class ToolCall(BaseBlock):
+    id: str
+    name: str
+    arguments: str
+    response: str
+
+
 class Session:
-    messages: list[Message]
+    def __init__(self, messages: list[BaseBlock]) -> None:
+        self.messages = messages
 
     def __len__(self) -> int:
         return len(self.messages)
 
+    def __getitem__(self, index: int) -> BaseBlock:
+        return self.messages[index]
+
+    def __iter__(self) -> Iterator[BaseBlock]:
+        return iter(self.messages)
+
     def __str__(self) -> str:
-        return "\n".join([str(message) for message in self.messages])
+        return "\n".join(f"{msg.role}: {msg.content}" for msg in self.messages)
+
+    def get_messages_by_role(self, role: str) -> list[BaseBlock]:
+        return [msg for msg in self.messages if msg.role == role]
+
+    def get_code_blocks(self) -> list[CodeBlock]:
+        return [msg for msg in self.messages if isinstance(msg, CodeBlock)]
+
+    def get_tool_calls(self) -> list[ToolCall]:
+        return [msg for msg in self.messages if isinstance(msg, ToolCall)]
 
 
 @dataclass

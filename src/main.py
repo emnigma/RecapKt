@@ -1,4 +1,4 @@
-from src.summarize_algorithms.core.models import Message, Session
+from src.summarize_algorithms.core.models import BaseBlock, Session
 from src.summarize_algorithms.memory_bank.dialogue_system import (
     MemoryBankDialogueSystem,
 )
@@ -40,7 +40,9 @@ def main() -> None:
 
     sessions = []
     for data in past_dialogue_sessions_data:
-        session = Session([Message(role1, data[role1]), Message(role2, data[role2])])
+        session = Session(
+            [BaseBlock(role1, data[role1]), BaseBlock(role2, data[role2])]
+        )
         sessions.append(session)
 
     result = system.process_dialogue(sessions, current_query)
