@@ -1,4 +1,9 @@
-from src.summarize_algorithms.core.models import BaseBlock, Session
+from src.summarize_algorithms.core.models import (
+    BaseBlock,
+    CodeBlock,
+    Session,
+    ToolCallBlock,
+)
 from src.summarize_algorithms.memory_bank.dialogue_system import (
     MemoryBankDialogueSystem,
 )
@@ -7,43 +12,113 @@ from src.summarize_algorithms.memory_bank.dialogue_system import (
 def main() -> None:
     role1 = "user"
     role2 = "assistant"
-    past_dialogue_sessions_data = [
-        {
-            role1: "Hi! I have a cat named Murka.",
-            role2: "Nice! I'm more of a dog person myself, but cats can be fun. What's Murka like?",
-        },
-        {
-            role1: "Murka loves playing with laser pointers.",
-            role2: "Classic! Though I've heard it can frustrate them since they never catch anything. "
-            "Speaking of entertainment, do you read much?",
-        },
-        {
-            role1: "I love reading fantasy books.",
-            role2: "Fantasy's hit or miss for me - I prefer sci-fi usually. Are you into any Italian authors? "
-            "I've been curious about their literature.",
-        },
-        {
-            role1: "I'm planning to go to Italy.",
-            role2: "Perfect timing then! I found Rome overwhelming when I visited. "
-            "You could read some Italian works to prep for the trip.",
-        },
-        {
-            role1: "I love cooking pasta.",
-            role2: "That'll be handy in Italy! I'm terrible at pasta - always turns out mushy. "
-            "Maybe I should stick to reading cookbooks instead of using them.",
-        },
+
+    sessions = [
+        Session(
+            [
+                BaseBlock(
+                    role1,
+                    "Hi! Can you help me write a function to calculate the factorial?",
+                ),
+                CodeBlock(
+                    role2,
+                    "Of course! Here’s an example in Python:",
+                    code="""
+        def factorial(n):
+            if n == 0 or n == 1:
+                return 1
+            return n * factorial(n - 1)
+        """,
+                ),
+            ]
+        ),
+        Session(
+            [
+                BaseBlock(
+                    role1, "I tested the function, but it crashes on large numbers."
+                ),
+                BaseBlock(
+                    role2,
+                    "Yes, for large numbers it’s better to use an iterative approach or math.factorial.",
+                ),
+                CodeBlock(
+                    role2,
+                    "Here’s the iterative version:",
+                    code="""
+        def factorial_iter(n):
+            result = 1
+            for i in range(2, n + 1):
+                result *= i
+            return result
+        """,
+                ),
+            ]
+        ),
+        Session(
+            [
+                BaseBlock(role1, "Check if there are any errors in my sorting code."),
+                CodeBlock(
+                    role1,
+                    "Here’s my code:",
+                    code="""
+        def sort_list(lst):
+            for i in range(len(lst)):
+                for j in range(len(lst) - 1):
+                    if lst[j] > lst[j+1]:
+                        lst[j], lst[j+1] = lst[j+1], lst[j]
+        """,
+                ),
+                ToolCallBlock(
+                    role=role2,
+                    id="tool_1",
+                    name="CodeAnalyzer",
+                    arguments='{"code": "def sort_list..."}',
+                    response="The code is correct, but the sorting is inefficient for large lists.",
+                    content="Code check completed. The code is correct, but the sorting is inefficient for"
+                    " large lists.",
+                ),
+            ]
+        ),
+        Session(
+            [
+                BaseBlock(role1, "How can it be improved?"),
+                BaseBlock(role2, "You can use the built-in function sorted:"),
+                CodeBlock(
+                    role2,
+                    "Example:",
+                    code="""
+        numbers = [5, 2, 9, 1]
+        sorted_numbers = sorted(numbers)
+        print(sorted_numbers)
+        """,
+                ),
+            ]
+        ),
+        Session(
+            [
+                BaseBlock(role1, "Can you execute this code and show the result?"),
+                CodeBlock(
+                    role1,
+                    "Code:",
+                    code="""
+        sum([i for i in range(1, 6)])
+        """,
+                ),
+                ToolCallBlock(
+                    role=role2,
+                    id="tool_2",
+                    name="PythonExecutor",
+                    arguments='{"code": "sum([i for i in range(1, 6)])"}',
+                    response="15",
+                    content="Code execution result: 15",
+                ),
+            ]
+        ),
     ]
 
-    current_query = "What would you recommend for me to read?"
+    current_query = "Can you show how to sort in descending order?"
 
     system = MemoryBankDialogueSystem()
-
-    sessions = []
-    for data in past_dialogue_sessions_data:
-        session = Session(
-            [BaseBlock(role1, data[role1]), BaseBlock(role2, data[role2])]
-        )
-        sessions.append(session)
 
     result = system.process_dialogue(sessions, current_query)
 
