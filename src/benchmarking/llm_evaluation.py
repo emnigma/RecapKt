@@ -12,6 +12,7 @@ from src.benchmarking.prompts import (
     SINGLE_EVALUATION_MEMORY_PROMPT,
     SINGLE_EVALUATION_RESPONSE_PROMPT,
 )
+from src.summarize_algorithms.core.models import OpenAIModels
 
 
 class SingleResult(BaseModel):
@@ -46,7 +47,7 @@ class PairwiseResult(BaseModel):
 
 class LLMResponseEvaluation:
     def __init__(self, llm: Optional[BaseChatModel] = None) -> None:
-        self.llm = llm or ChatOpenAI(model="gpt-4.1-mini", temperature=0.0)
+        self.llm = llm or ChatOpenAI(model=OpenAIModels.GPT_4_1.value, temperature=0.0)
         self.single_eval_prompt = SINGLE_EVALUATION_RESPONSE_PROMPT
         self.pairwise_eval_prompt = PAIRWISE_EVALUATION_RESPONSE_PROMPT
         self.single_eval_chain = self._build_single_eval_chain()

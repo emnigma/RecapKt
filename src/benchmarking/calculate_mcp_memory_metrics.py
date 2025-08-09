@@ -111,9 +111,11 @@ class CalculateMCPMemoryMetrics(CalculateMCPMetrics):
                 f"got {type(memory_bank_state)}"
             )
 
-        for i in range(len(recsum_state.memory)):
-            recsum_memory = recsum_state.memory[i]
-            memory_bank_memory = memory_bank_state.memory_storage.get_session_memory(i)
+        for i in range(len(recsum_state.text_memory)):
+            recsum_memory = recsum_state.text_memory[i]
+            memory_bank_memory = (
+                memory_bank_state.text_memory_storage.get_session_memory(i)
+            )
             ideal_memory = ideal_session_memory[i].memory
 
             self._update_semantic_scores(

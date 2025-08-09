@@ -6,12 +6,14 @@ from langchain_core.runnables import Runnable
 from langchain_openai import ChatOpenAI
 
 from src.benchmarking.prompts import BASELINE_PROMPT
-from src.summarize_algorithms.core.models import Session
+from src.summarize_algorithms.core.models import OpenAIModels, Session
 
 
 class DialogueBaseline:
     def __init__(self, llm: Optional[BaseChatModel] = None) -> None:
-        self.llm = llm or ChatOpenAI(model="gpt-4.1-mini", temperature=0.0)
+        self.llm = llm or ChatOpenAI(
+            model=OpenAIModels.GPT_4_1_MINI.value, temperature=0.0
+        )
         self.prompt_template = BASELINE_PROMPT
         self.chain = self._build_chain()
 

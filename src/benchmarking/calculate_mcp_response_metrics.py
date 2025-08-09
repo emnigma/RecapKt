@@ -92,12 +92,12 @@ class CalculateMCPResponseMetrics(CalculateMCPMetrics):
             query = dialogue[-1].messages.pop()
 
             recsum_response = self.recsum.process_dialogue(
-                dialogue, query.message
+                dialogue, query.content
             ).response
-            baseline_response = self.baseline.process_dialogue(dialogue, query.message)
+            baseline_response = self.baseline.process_dialogue(dialogue, query.content)
 
             self._update_semantic_scores(
-                recsum_response, baseline_response, ideal_response.message
+                recsum_response, baseline_response, ideal_response.content
             )
 
             context = str(dialogue[-1])

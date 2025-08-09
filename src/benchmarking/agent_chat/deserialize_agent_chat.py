@@ -3,7 +3,12 @@ import re
 
 from typing import Any, Iterator
 
-from src.summarize_algorithms.core.models import BaseBlock, CodeBlock, Session, ToolCall
+from src.summarize_algorithms.core.models import (
+    BaseBlock,
+    CodeBlock,
+    Session,
+    ToolCallBlock,
+)
 
 
 class MessageProcessor:
@@ -60,10 +65,13 @@ class MessageProcessor:
 
         for tool_call, tool_response in zip(tool_calls, tool_responses):
             if tool_content is None:
-                tool_content = f"{tool_call['name']} {tool_call['arguments']} {tool_response['responseData']}"
+                tool_content = (
+                    f"name: {tool_call['name']}\narguments: {tool_call['arguments']}\n"
+                    f"response: {tool_response['responseData']}"
+                )
 
             blocks.append(
-                ToolCall(
+                ToolCallBlock(
                     role="tool_call",
                     content=tool_content,
                     id=tool_call["id"],

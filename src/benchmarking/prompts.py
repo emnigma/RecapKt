@@ -73,7 +73,8 @@ Evaluate each criterion independently and provide your assessment for all three 
 )
 
 
-SINGLE_EVALUATION_MEMORY_PROMPT = PromptTemplate.from_template("""
+SINGLE_EVALUATION_MEMORY_PROMPT = PromptTemplate.from_template(
+    """
 You are a meticulous and impartial evaluator. Your task is to assess the quality of the `Generated Memory`
  by comparing it to the `Ideal Memory`.
 
@@ -122,7 +123,8 @@ Then, assign an integer **Score** from 1 to 100 using the following scale:
  difficult to understand.
 * **1–20 (Very Poor):** The `Generated Memory` is largely inaccurate, includes contradictory information, or fails to
  convey the essence of the `Ideal Memory`.
-""")
+"""
+)
 
 PAIRWISE_EVALUATION_MEMORY_PROMPT = PromptTemplate.from_template(
     """
