@@ -157,14 +157,16 @@ class CalculateMCPMemoryMetrics(CalculateMCPMetrics):
         ideal_memory: list[str],
     ) -> None:
         recsum_score = self.llm_scorer.evaluate_single(
-            "\n".join(ideal_memory), "\n".join(recsum_memory)
+            ideal_memory="\n".join(ideal_memory),
+            memory="\n".join(recsum_memory),
         )
         self._recsum_llm_data.faithfulness.append(recsum_score.faithfulness_score)
         self._recsum_llm_data.informativeness.append(recsum_score.informativeness_score)
         self._recsum_llm_data.coherency.append(recsum_score.coherency_score)
 
         memory_bank_score = self.llm_scorer.evaluate_single(
-            "\n".join(ideal_memory), "\n".join(memory_bank_memory)
+            ideal_memory="\n".join(ideal_memory),
+            memory="\n".join(memory_bank_memory),
         )
         self._memory_bank_llm_data.faithfulness.append(
             memory_bank_score.faithfulness_score
@@ -184,16 +186,16 @@ class CalculateMCPMemoryMetrics(CalculateMCPMetrics):
 
         if randomize_order:
             score = self.llm_scorer.evaluate_pairwise(
-                "\n".join(ideal_memory),
-                "\n".join(recsum_memory),
-                "\n".join(memory_bank_memory),
+                ideal_memory="\n".join(ideal_memory),
+                first_memory="\n".join(recsum_memory),
+                second_memory="\n".join(memory_bank_memory),
             )
             self._update_pairwise_counts(score, recsum_first=True)
         else:
             score = self.llm_scorer.evaluate_pairwise(
-                "\n".join(ideal_memory),
-                "\n".join(memory_bank_memory),
-                "\n".join(recsum_memory),
+                ideal_memory="\n".join(ideal_memory),
+                first_memory="\n".join(memory_bank_memory),
+                second_memory="\n".join(recsum_memory),
             )
             self._update_pairwise_counts(score, recsum_first=False)
 

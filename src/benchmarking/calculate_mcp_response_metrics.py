@@ -131,13 +131,15 @@ class CalculateMCPResponseMetrics(CalculateMCPMetrics):
     def _update_llm_single_scores(
         self, recsum_response: str, baseline_response: str, context: str, memory: str
     ) -> None:
-        recsum_score = self.llm_scorer.evaluate_single(context, memory, recsum_response)
+        recsum_score = self.llm_scorer.evaluate_single(
+            context=context, memory=memory, response=recsum_response
+        )
         self._recsum_llm_data.faithfulness.append(recsum_score.faithfulness_score)
         self._recsum_llm_data.informativeness.append(recsum_score.informativeness_score)
         self._recsum_llm_data.coherency.append(recsum_score.coherency_score)
 
         baseline_score = self.llm_scorer.evaluate_single(
-            context, memory, baseline_response
+            context=context, memory=memory, response=baseline_response
         )
         self._baseline_llm_data.faithfulness.append(baseline_score.faithfulness_score)
         self._baseline_llm_data.informativeness.append(
@@ -152,12 +154,18 @@ class CalculateMCPResponseMetrics(CalculateMCPMetrics):
 
         if randomize_order:
             score = self.llm_scorer.evaluate_pairwise(
-                context, memory, recsum_response, baseline_response
+                context=context,
+                memory=memory,
+                first_response=recsum_response,
+                second_response=baseline_response,
             )
             self._update_pairwise_counts(score, recsum_first=True)
         else:
             score = self.llm_scorer.evaluate_pairwise(
-                context, memory, baseline_response, recsum_response
+                context=context,
+                memory=memory,
+                first_response=baseline_response,
+                second_response=recsum_response,
             )
             self._update_pairwise_counts(score, recsum_first=False)
 

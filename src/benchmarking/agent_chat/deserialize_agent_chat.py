@@ -106,7 +106,9 @@ class ChatDataset:
 
     @classmethod
     def from_file(
-        cls, file_name: str = "combined_chat_history_sessions.json"
+        cls,
+        file_name: str = "/home/kush/machine_learning/RecapKt/src/benchmarking/agent_chat/"
+        "combined_chat_history_sessions.json",
     ) -> "ChatDataset":
         processor = MessageProcessor()
         sessions = []
@@ -145,26 +147,3 @@ class ChatDataset:
             sessions.append(Session(messages=result_blocks))
 
         return cls(sessions)
-
-
-# def main():
-#     dataset = ChatDataset.from_file()
-#
-#     print(f"Загружено сессий: {len(dataset)}")
-#     print(f"Общее количество сообщений: {dataset.total_messages()}")
-#
-#     if len(dataset) > 0:
-#         first_session = dataset[0]
-#         print(f"\nПервая сессия содержит {len(first_session)} сообщений:")
-#
-#         for i, block in enumerate(first_session):
-#             print(f"Блок {i + 1}: {type(block).__name__} - {block.role}")
-#             print(f"  Содержимое: {block.content[:100]}...")
-#             if isinstance(block, CodeBlock):
-#                 print(f"  Код: {block.code[:50]}...")
-#             elif isinstance(block, ToolCall):
-#                 print(f"  Инструмент: {block.name}")
-#
-#
-# if __name__ == "__main__":
-#     main()

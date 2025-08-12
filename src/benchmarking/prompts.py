@@ -155,3 +155,90 @@ For each criterion, output one of:
 Provide a brief rationale (1–2 sentences) only if the distinction is subtle or non-obvious.
     """
 )
+
+SINGLE_EVALUATION_AGENT_RESPONSE = PromptTemplate.from_template("""
+You are a highly critical expert judge evaluating an AI assistant's answer in a dialogue that may contain:
+- Regular conversation
+- Code snippets
+
+Your goal is to provide a fair but **strict** evaluation, avoiding inflated scores.
+Do not give a score of 100 unless the answer is flawless, with zero detectable issues in correctness, clarity,
+ and context handling.
+
+## Input:
+- Dialogue Context: {dialogue_context}
+- Assistant's Answer: {assistant_answer}
+
+## Criteria:
+
+1. Correctness
+   - Is the answer technically accurate and factually correct?
+   - If code is present, does it fully solve the user's task without logical, syntactical, or runtime errors?
+   - Does it cover all necessary edge cases?
+   - Penalize missing details, untested assumptions, or lack of necessary safeguards.
+
+2. Clarity
+   - Is the answer structured logically and easy to follow?
+   - If code is present, is it properly formatted, readable, and accompanied by concise explanations?
+   - Penalize for excessive verbosity, ambiguous language, poor variable naming, or unclear explanations.
+
+3. Context Handling
+   - Does the answer fully align with the conversation history and prior constraints?
+   - Penalize if any relevant instruction, preference, or constraint from the dialogue is ignored or altered.
+   - Penalize for inconsistencies with previously provided information.
+
+## Scoring Guidelines (per criterion):
+- 91–100: Flawless — no meaningful improvements possible.
+- 81–90: Very good — only minor, non-critical improvements possible.
+- 61–80: Adequate — generally correct, but notable gaps, omissions, or unclear parts.
+- 41–60: Weak — several important errors or missing pieces.
+- 0–40: Poor — fundamentally incorrect or irrelevant.
+
+## Output format:
+For each criterion, output:
+- A score from 0 to 100 (integer only)
+- A one-sentence justification highlighting the strongest reason for the score (even if very high — always find at least
+ one potential improvement).
+""")
+
+
+PAIRWISE_EVALUATION_AGENT_RESPONSE = PromptTemplate.from_template("""
+You are a highly critical expert evaluator comparing two AI assistant answers to the same user request in a dialogue
+ that may contain:
+- Regular conversation
+- Code snippets
+
+Your task: Decide which answer is better for each criterion below, applying strict judgment.
+
+## Input:
+- Dialogue Context: {dialogue_context}
+- Option 1: {first_answer}
+- Option 2: {second_answer}
+
+## Criteria:
+
+1. Correctness
+   - Technical accuracy and factual correctness.
+   - If code is present, verify it solves the user's request fully without logical, syntactical, or runtime errors.
+   - Penalize missing edge cases, untested assumptions, or incomplete solutions.
+
+2. Clarity
+   - Logical structure, readability, and ease of understanding.
+   - If code is present, check formatting, naming clarity, and if explanations are concise yet sufficient.
+   - Penalize verbosity, ambiguity, or unclear reasoning.
+
+3. Context Handling
+   - Alignment with conversation history and earlier constraints.
+   - Adherence to the user's instructions and preferences.
+   - Penalize contradictions or omissions of relevant details.
+
+## Evaluation rules:
+- Always look for at least one reason why one answer is better.
+- Do not give "Draw" unless the answers are truly equal in quality across **all** criteria.
+- If both have flaws but one has fewer or less critical flaws, choose it.
+- Be critical: small errors or missed improvements should break a tie.
+
+## Output format:
+- State the better option for each criterion ("Option 1", "Option 2", or "Draw").
+- If the distinction is subtle or non-obvious, provide a brief (1–2 sentence) justification.
+""")
