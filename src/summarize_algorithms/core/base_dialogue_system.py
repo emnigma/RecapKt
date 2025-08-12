@@ -3,6 +3,7 @@ import functools
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Type
 
+from langchain_community.callbacks import get_openai_callback
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import PromptTemplate
@@ -42,6 +43,9 @@ class BaseDialogueSystem(ABC):
         self.embed_tool = embed_tool
         self.embed_model = embed_model
         self.max_session_id = max_session_id
+        self.prompt_tokens = 0
+        self.completion_tokens = 0
+        self.total_cost = 0.0
 
     @abstractmethod
     def _build_summarizer(self) -> Any:
@@ -89,5 +93,12 @@ class BaseDialogueSystem(ABC):
 
     def process_dialogue(self, sessions: list[Session], query: str) -> DialogueState:
         initial_state = self._get_initial_state(sessions, query)
-        self.state = self._get_dialogue_state_class(**self.graph.invoke(initial_state))
+        with get_openai_callback() as cb:
+            self.state = self._get_dialogue_state_class(
+                **self.graph.invoke(initial_state)
+            )
+
+            self.prompt_tokens += cb.prompt_tokens
+            self.completion_tokens += cb.completion_tokens
+            self.total_cost += cb.total_cost
         return self.state if self.state is not None else initial_state

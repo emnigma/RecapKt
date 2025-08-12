@@ -39,6 +39,19 @@ class Session:
     def __len__(self) -> int:
         return len(self.messages)
 
+    def __str__(self) -> str:
+        result_messages = []
+        for msg in self.messages:
+            if isinstance(msg, CodeBlock):
+                result_messages.append(f"{msg.role}: {msg.code}")
+            if isinstance(msg, ToolCallBlock):
+                result_messages.append(
+                    f"Tool Call [{msg.id}]: {msg.name} - {msg.arguments} -> {msg.response}"
+                )
+            else:
+                result_messages.append(f"{msg.role}: {msg.content}")
+        return "\n".join(result_messages)
+
     def __getitem__(self, index: int) -> BaseBlock:
         return self.messages[index]
 

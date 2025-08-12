@@ -122,6 +122,9 @@ def main() -> None:
 
     result = system.process_dialogue(sessions, current_query)
 
+    print(f"Prompts Tokens: {system.prompt_tokens}")
+    print(f"Completion Tokens: {system.completion_tokens}")
+    print(f"Total Cost: {system.total_cost}")
     print(f"Response: {result.response}")
 
 
