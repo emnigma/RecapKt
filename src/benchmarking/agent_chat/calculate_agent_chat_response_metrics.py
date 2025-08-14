@@ -30,7 +30,8 @@ class PairwiseResult:
     rag_recsum: int = 0
     base_memory_bank: int = 0
     rag_memory_bank: int = 0
-    baseline: int = 0
+    full_baseline: int = 0
+    last_baseline: int = 0
 
 
 class CalculateAgentChatResponseMetrics:
@@ -43,7 +44,8 @@ class CalculateAgentChatResponseMetrics:
         self.rag_recsum_single_result = SingleResult()
         self.base_memory_bank_single_result = SingleResult()
         self.rag_memory_bank_single_result = SingleResult()
-        self.baseline_single_result = SingleResult()
+        self.full_sessions_baseline_single_result = SingleResult()
+        self.last_session_baseline_single_result = SingleResult()
 
         self.pairwise_result = PairwiseResult()
 
@@ -57,7 +59,8 @@ class CalculateAgentChatResponseMetrics:
             embed_code=True, embed_tool=True
         )
 
-        self.baseline = DialogueBaseline()
+        self.full_baseline = DialogueBaseline()
+        self.last_baseline = DialogueBaseline()
 
     def calculate(self) -> None:
         dialogue = self.dataset.sessions
@@ -87,7 +90,12 @@ class CalculateAgentChatResponseMetrics:
         rag_memory_bank_response = self.rag_memory_bank.process_dialogue(
             sessions, query
         ).response
-        baseline_response = self.baseline.process_dialogue(sessions, query)
+        full_sessions_baseline_response = self.full_baseline.process_dialogue(
+            sessions, query
+        )
+        last_session_baseline_response = self.last_baseline.process_dialogue(
+            [sessions[-1]], query
+        )
 
         base_recsum_single_score = self.llm_scorer.evaluate_single(
             dialogue_context=dialogue_context, assistant_answer=base_recsum_response
@@ -102,8 +110,13 @@ class CalculateAgentChatResponseMetrics:
         rag_memory_bank_single_score = self.llm_scorer.evaluate_single(
             dialogue_context=dialogue_context, assistant_answer=rag_memory_bank_response
         )
-        baseline_single_score = self.llm_scorer.evaluate_single(
-            dialogue_context=dialogue_context, assistant_answer=baseline_response
+        full_sessions_baseline_single_score = self.llm_scorer.evaluate_single(
+            dialogue_context=dialogue_context,
+            assistant_answer=full_sessions_baseline_response,
+        )
+        last_session_baseline_single_score = self.llm_scorer.evaluate_single(
+            dialogue_context=dialogue_context,
+            assistant_answer=last_session_baseline_response,
         )
 
         self._single_eval_update(
@@ -116,14 +129,21 @@ class CalculateAgentChatResponseMetrics:
         self._single_eval_update(
             self.rag_memory_bank_single_result, rag_memory_bank_single_score
         )
-        self._single_eval_update(self.baseline_single_result, baseline_single_score)
+        self._single_eval_update(
+            self.full_sessions_baseline_single_result,
+            full_sessions_baseline_single_score,
+        )
+        self._single_eval_update(
+            self.last_session_baseline_single_result, last_session_baseline_single_score
+        )
 
         variants = [
             base_recsum_response,
             rag_recsum_response,
             base_memory_bank_response,
             rag_memory_bank_response,
-            baseline_response,
+            full_sessions_baseline_response,
+            last_session_baseline_response,
         ]
         pairs = list(itertools.combinations(variants, 2))
 
@@ -139,7 +159,8 @@ class CalculateAgentChatResponseMetrics:
                 rag_recsum_response: "rag_recsum",
                 base_memory_bank_response: "base_memory_bank",
                 rag_memory_bank_response: "rag_memory_bank",
-                baseline_response: "baseline",
+                full_sessions_baseline_response: "full_baseline",
+                last_session_baseline_response: "last_baseline",
             }
 
             alg1 = mapping[var1]
@@ -210,9 +231,16 @@ class CalculateAgentChatResponseMetrics:
             f"{avg(self.rag_memory_bank_single_result.context_handling):<8.2f}"
         )
         print(
-            f"{'Baseline':<20} | {avg(self.baseline_single_result.correctness):<12.2f} | "
-            f"{avg(self.baseline_single_result.clarity):<8.2f} | "
-            f"{avg(self.baseline_single_result.context_handling):<8.2f}"
+            f"{'Full Sessions Context Baseline':<20} |"
+            f" {avg(self.full_sessions_baseline_single_result.correctness):<12.2f} | "
+            f"{avg(self.full_sessions_baseline_single_result.clarity):<8.2f} | "
+            f"{avg(self.full_sessions_baseline_single_result.context_handling):<8.2f}"
+        )
+        print(
+            f"{'Last Session Context Baseline':<20} |"
+            f" {avg(self.last_session_baseline_single_result.correctness):<12.2f} | "
+            f"{avg(self.last_session_baseline_single_result.clarity):<8.2f} | "
+            f"{avg(self.last_session_baseline_single_result.context_handling):<8.2f}"
         )
 
         print("\n===Pairwise Evaluation Results ===")
@@ -220,7 +248,12 @@ class CalculateAgentChatResponseMetrics:
         print(f"{'RAG Recsum':<20}: {self.pairwise_result.rag_recsum}")
         print(f"{'Base MemoryBank':<20}: {self.pairwise_result.base_memory_bank}")
         print(f"{'RAG MemoryBank':<20}: {self.pairwise_result.rag_memory_bank}")
-        print(f"{'Baseline':<20}: {self.pairwise_result.baseline}")
+        print(
+            f"{'Full Sessions context Baseline':<20}: {self.pairwise_result.full_baseline}"
+        )
+        print(
+            f"{'Last Session context Baseline':<20}: {self.pairwise_result.last_baseline}"
+        )
 
         print("\n===Token Usage and Cost ===")
         print(
@@ -232,7 +265,8 @@ class CalculateAgentChatResponseMetrics:
             ("RAG Recsum", self.rag_recsum),
             ("Base MemoryBank", self.base_memory_bank),
             ("RAG MemoryBank", self.rag_memory_bank),
-            ("Baseline", self.baseline),
+            ("Full Sessions Context Baseline", self.full_baseline),
+            ("Last Session Context Baseline", self.last_baseline),
         ]:
             print(
                 f"{name:<20} | {algo.prompt_tokens:<15} | {algo.completion_tokens:<18} | {algo.total_cost:<12.5f}"  # type: ignore
