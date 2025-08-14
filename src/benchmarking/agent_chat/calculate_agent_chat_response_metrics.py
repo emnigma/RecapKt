@@ -207,57 +207,53 @@ class CalculateAgentChatResponseMetrics:
 
         print("\n===Single Evaluation Results ===")
         print(
-            f"{'Algorithm':<20} | {'Correctness':<12} | {'Clarity':<8} | {'Context':<8}"
+            f"{'Algorithm':<25} | {'Correctness':<12} | {'Clarity':<8} | {'Context':<8}"
         )
         print("-" * 60)
         print(
-            f"{'Base Recsum':<20} | {avg(self.base_recsum_single_result.correctness):<12.2f} | "
+            f"{'Base Recsum':<25} | {avg(self.base_recsum_single_result.correctness):<12.2f} | "
             f"{avg(self.base_recsum_single_result.clarity):<8.2f} | "
             f"{avg(self.base_recsum_single_result.context_handling):<8.2f}"
         )
         print(
-            f"{'RAG Recsum':<20} | {avg(self.rag_recsum_single_result.correctness):<12.2f} | "
+            f"{'RAG Recsum':<25} | {avg(self.rag_recsum_single_result.correctness):<12.2f} | "
             f"{avg(self.rag_recsum_single_result.clarity):<8.2f} | "
             f"{avg(self.rag_recsum_single_result.context_handling):<8.2f}"
         )
         print(
-            f"{'Base MemoryBank':<20} | {avg(self.base_memory_bank_single_result.correctness):<12.2f} | "
+            f"{'Base MemoryBank':<25} | {avg(self.base_memory_bank_single_result.correctness):<12.2f} | "
             f"{avg(self.base_memory_bank_single_result.clarity):<8.2f} | "
             f"{avg(self.base_memory_bank_single_result.context_handling):<8.2f}"
         )
         print(
-            f"{'RAG MemoryBank':<20} | {avg(self.rag_memory_bank_single_result.correctness):<12.2f} | "
+            f"{'RAG MemoryBank':<25} | {avg(self.rag_memory_bank_single_result.correctness):<12.2f} | "
             f"{avg(self.rag_memory_bank_single_result.clarity):<8.2f} | "
             f"{avg(self.rag_memory_bank_single_result.context_handling):<8.2f}"
         )
         print(
-            f"{'Full Sessions Context Baseline':<20} |"
+            f"{'Full Sessions Baseline':<25} |"
             f" {avg(self.full_sessions_baseline_single_result.correctness):<12.2f} | "
             f"{avg(self.full_sessions_baseline_single_result.clarity):<8.2f} | "
             f"{avg(self.full_sessions_baseline_single_result.context_handling):<8.2f}"
         )
         print(
-            f"{'Last Session Context Baseline':<20} |"
+            f"{'Last Session Baseline':<25} |"
             f" {avg(self.last_session_baseline_single_result.correctness):<12.2f} | "
             f"{avg(self.last_session_baseline_single_result.clarity):<8.2f} | "
             f"{avg(self.last_session_baseline_single_result.context_handling):<8.2f}"
         )
 
         print("\n===Pairwise Evaluation Results ===")
-        print(f"{'Base Recsum':<20}: {self.pairwise_result.base_recsum}")
-        print(f"{'RAG Recsum':<20}: {self.pairwise_result.rag_recsum}")
-        print(f"{'Base MemoryBank':<20}: {self.pairwise_result.base_memory_bank}")
-        print(f"{'RAG MemoryBank':<20}: {self.pairwise_result.rag_memory_bank}")
-        print(
-            f"{'Full Sessions context Baseline':<20}: {self.pairwise_result.full_baseline}"
-        )
-        print(
-            f"{'Last Session context Baseline':<20}: {self.pairwise_result.last_baseline}"
-        )
+        print(f"{'Base Recsum':<25}: {self.pairwise_result.base_recsum}")
+        print(f"{'RAG Recsum':<25}: {self.pairwise_result.rag_recsum}")
+        print(f"{'Base MemoryBank':<25}: {self.pairwise_result.base_memory_bank}")
+        print(f"{'RAG MemoryBank':<25}: {self.pairwise_result.rag_memory_bank}")
+        print(f"{'Full Sessions Baseline':<25}: {self.pairwise_result.full_baseline}")
+        print(f"{'Last Session Baseline':<25}: {self.pairwise_result.last_baseline}")
 
         print("\n===Token Usage and Cost ===")
         print(
-            f"{'Algorithm':<20} | {'Prompt tokens':<15} | {'Completion tokens':<18} | {'Total cost ($)':<12}"
+            f"{'Algorithm':<25} | {'Prompt tokens':<15} | {'Completion tokens':<18} | {'Total cost ($)':<12}"
         )
         print("-" * 80)
         for name, algo in [
@@ -265,11 +261,11 @@ class CalculateAgentChatResponseMetrics:
             ("RAG Recsum", self.rag_recsum),
             ("Base MemoryBank", self.base_memory_bank),
             ("RAG MemoryBank", self.rag_memory_bank),
-            ("Full Sessions Context Baseline", self.full_baseline),
-            ("Last Session Context Baseline", self.last_baseline),
+            ("Full Sessions Baseline", self.full_baseline),
+            ("Last Session Baseline", self.last_baseline),
         ]:
             print(
-                f"{name:<20} | {algo.prompt_tokens:<15} | {algo.completion_tokens:<18} | {algo.total_cost:<12.5f}"  # type: ignore
+                f"{name:<25} | {algo.prompt_tokens:<15} | {algo.completion_tokens:<18} | {algo.total_cost:<12.5f}"  # type: ignore
             )
 
         print("\n===Processed Messages ===")
@@ -280,7 +276,7 @@ def main() -> None:
     metric_calculator = CalculateAgentChatResponseMetrics()
 
     print("Starting Agent Chat metrics calculation...")
-    metric_calculator.calculate()
+    # metric_calculator.calculate()
 
     print("Calculation completed. Results:")
     metric_calculator.print_results()
