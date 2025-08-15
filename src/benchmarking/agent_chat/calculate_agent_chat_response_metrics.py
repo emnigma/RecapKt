@@ -276,7 +276,7 @@ def main() -> None:
     metric_calculator = CalculateAgentChatResponseMetrics()
 
     print("Starting Agent Chat metrics calculation...")
-    # metric_calculator.calculate()
+    metric_calculator.calculate()
 
     print("Calculation completed. Results:")
     metric_calculator.print_results()
