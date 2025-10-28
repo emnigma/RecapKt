@@ -1,29 +1,27 @@
 import json
-import logging
-import os
 
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
-from src.summarize_algorithms.core.models import DialogueState, Session
+from src.benchmarking.base_logger import BaseLogger
+from src.summarize_algorithms.core.models import DialogueState, MetricState, Session
 
 
-class MemoryLogger:
-    def __init__(self, logs_dir: str = "logs/memory") -> None:
-        os.makedirs(logs_dir, exist_ok=True)
-        self.log_dir = Path(logs_dir)
-        self.logger = logging.getLogger(__name__)
-
+class MemoryLogger(BaseLogger):
     def log_iteration(
             self,
             system_name: str,
             query: str,
-            state: DialogueState,
             iteration: int,
-            sessions: list[Session]
-    ) -> None:
+            sessions: list[Session],
+            state: DialogueState | None,
+            metric: MetricState | None = None,
+            is_return: bool = False
+    ) -> None | dict[str, Any]:
         self.logger.info(f"Logging iteration {iteration} to {self.log_dir}")
+
+        if state is None:
+            raise ValueError("'state' argument is necessary for MemoryLogger")
 
         record = {
             "timestamp": datetime.now().isoformat(),
@@ -35,11 +33,18 @@ class MemoryLogger:
             "sessions": [s.to_dict() for s in sessions],
         }
 
+        if metric is not None:
+            record["metric_name"] = metric.metric.value
+            record["metric_value"] = metric.value
+
         with open(self.log_dir / (system_name + str(iteration) + ".jsonl"), "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False, indent=4))
             f.write("\n")
 
         self.logger.info(f"Saved successfully iteration {iteration} to {self.log_dir}")
+
+        if is_return:
+            return record
 
     @staticmethod
     def _serialize_memories(state: DialogueState) -> dict[str, Any]:

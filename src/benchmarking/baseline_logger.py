@@ -1,27 +1,23 @@
 import json
-import logging
-import os
 
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
-from src.summarize_algorithms.core.models import DialogueState, Session
+from src.benchmarking.base_logger import BaseLogger
+from src.summarize_algorithms.core.models import DialogueState, MetricState, Session
 
 
-class BaselineLogger:
-    def __init__(self, logs_dir: str = "logs/baseline") -> None:
-        os.makedirs(logs_dir, exist_ok=True)
-        self.log_dir = Path(logs_dir)
-        self.logger = logging.getLogger(__name__)
-
+class BaselineLogger(BaseLogger):
     def log_iteration(
             self,
             system_name: str,
             query: str,
             iteration: int,
-            sessions: list[Session]
-    ) -> None:
+            sessions: list[Session],
+            state: DialogueState | None = None,
+            metric: MetricState | None = None,
+            is_return: bool = False
+    ) -> None | dict[str, Any]:
         self.logger.info(f"Logging iteration {iteration} to {self.log_dir}")
 
         record = {
@@ -37,6 +33,9 @@ class BaselineLogger:
             f.write("\n")
 
         self.logger.info(f"Saved successfully iteration {iteration} to {self.log_dir}")
+
+        if is_return:
+            return record
 
     @staticmethod
     def _serialize_memories(state: DialogueState) -> dict[str, Any]:

@@ -56,12 +56,8 @@ class CalculateAgentChatResponseMetrics:
         self.base_recsum = RecsumDialogueSystem(embed_code=False, embed_tool=False)
         self.rag_recsum = RecsumDialogueSystem(embed_code=True, embed_tool=True)
 
-        self.base_memory_bank = MemoryBankDialogueSystem(
-            embed_code=False, embed_tool=False
-        )
-        self.rag_memory_bank = MemoryBankDialogueSystem(
-            embed_code=True, embed_tool=True
-        )
+        self.base_memory_bank = MemoryBankDialogueSystem(embed_code=False, embed_tool=False)
+        self.rag_memory_bank = MemoryBankDialogueSystem(embed_code=True, embed_tool=True)
 
         self.full_baseline = DialogueBaseline("FullBaseline")
         self.last_baseline = DialogueBaseline("LastBaseline")
