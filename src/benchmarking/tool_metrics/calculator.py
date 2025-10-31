@@ -2,9 +2,8 @@ from pathlib import Path
 from typing import Any
 
 from src.benchmarking.base_logger import BaseLogger
-from src.benchmarking.baseline import DialogueBaseline
 from src.benchmarking.tool_metrics.base_evaluator import BaseEvaluator
-from src.summarize_algorithms.core.base_dialogue_system import BaseDialogueSystem
+from src.summarize_algorithms.core.dialog import Dialog
 from src.summarize_algorithms.core.models import DialogueState, MetricState, Session
 
 
@@ -15,14 +14,14 @@ class Calculator:
 
     def evaluate(
             self,
-            algorithms: list[BaseDialogueSystem | DialogueBaseline],
+            algorithms: list[Dialog],
             evaluator_function: BaseEvaluator,
             sessions: list[Session],
             reference_session: Session,
             count_of_sessions_to_evaluate: int = 0,
     ) -> list[dict[str, Any]]:
-        if count_of_sessions_to_evaluate >= len(sessions):
-            raise ValueError("count_of_sessions_to_evaluate is greater then count of entire sessions.")
+        assert count_of_sessions_to_evaluate < len(sessions),\
+            "count_of_sessions_to_evaluate is greater then count of entire sessions."
 
         using_sessions: list[Session] = sessions[:count_of_sessions_to_evaluate]
         user_role_messages = reference_session.get_messages_by_role("USER")
@@ -43,8 +42,7 @@ class Calculator:
                 True
             )
 
-            if record is None:
-                raise ValueError("logger didn't return a value")
+            assert record is not None, "logger didn't return a value"
 
             metrics.append(record)
 

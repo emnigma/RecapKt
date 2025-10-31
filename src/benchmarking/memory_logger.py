@@ -23,13 +23,14 @@ class MemoryLogger(BaseLogger):
         if state is None:
             raise ValueError("'state' argument is necessary for MemoryLogger")
 
+        penis = MemoryLogger._serialize_memories(state)
         record = {
             "timestamp": datetime.now().isoformat(),
             "iteration": iteration,
             "system": system_name,
             "query": query,
             "response": getattr(state, "response", None),
-            "memory": MemoryLogger._serialize_memories(state),
+            "memory": penis,
             "sessions": [s.to_dict() for s in sessions],
         }
 
@@ -45,17 +46,3 @@ class MemoryLogger(BaseLogger):
 
         if is_return:
             return record
-
-    @staticmethod
-    def _serialize_memories(state: DialogueState) -> dict[str, Any]:
-        result = {}
-        for name in ["text_memory_storage", "code_memory_storage", "tool_memory_storage"]:
-            storage = getattr(state, name, None)
-            if storage is not None:
-                result[name] = storage.__dict__()
-
-        text_memory = getattr(state, "text_memory", None)
-        if text_memory is not None:
-            result["text_memory"] = text_memory
-
-        return result

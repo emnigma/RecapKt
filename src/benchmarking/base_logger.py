@@ -5,7 +5,13 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
-from src.summarize_algorithms.core.models import DialogueState, MetricState, Session
+from src.summarize_algorithms.core.models import (
+    DialogueState,
+    MemoryBankDialogueState,
+    MetricState,
+    RecsumDialogueState,
+    Session,
+)
 
 
 class BaseLogger(ABC):
@@ -28,6 +34,16 @@ class BaseLogger(ABC):
         ...
 
     @staticmethod
-    @abstractmethod
     def _serialize_memories(state: DialogueState) -> dict[str, Any]:
-        ...
+        result: dict[str, Any] = {}
+
+        if state.code_memory_storage is not None:
+            result["code_memory_storage"] = state.code_memory_storage.to_dict()
+        if state.tool_memory_storage is not None:
+            result["tool_memory_storage"] = state.tool_memory_storage.to_dict()
+        if isinstance(state, MemoryBankDialogueState):
+            result["text_memory_storage"] = state.text_memory_storage.to_dict()
+        if isinstance(state, RecsumDialogueState):
+            result["text_memory"] = state.text_memory
+
+        return result

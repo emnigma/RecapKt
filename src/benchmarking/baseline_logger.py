@@ -36,17 +36,3 @@ class BaselineLogger(BaseLogger):
 
         if is_return:
             return record
-
-    @staticmethod
-    def _serialize_memories(state: DialogueState) -> dict[str, Any]:
-        result = {}
-        for name in ["text_memory_storage", "code_memory_storage", "tool_memory_storage"]:
-            storage = getattr(state, name, None)
-            if storage is not None:
-                result[name] = storage.__dict__()
-
-        text_memory = getattr(state, "text_memory", None)
-        if text_memory is not None:
-            result["text_memory"] = text_memory
-
-        return result

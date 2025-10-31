@@ -83,7 +83,7 @@ def test_evaluate_success(fake_logger, fake_evaluator, fake_algorithm, sessions,
 
 def test_raises_when_count_too_large(fake_logger, fake_evaluator, fake_algorithm, sessions, reference_session):
     calc = Calculator(logger=fake_logger)
-    with pytest.raises(ValueError, match="greater then count of entire sessions"):
+    with pytest.raises(AssertionError, match="greater then count of entire sessions"):
         calc.evaluate(
             algorithms=[fake_algorithm],
             evaluator_function=fake_evaluator,

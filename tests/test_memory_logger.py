@@ -16,7 +16,7 @@ class FakeStorage:
     def __init__(self, name: str):
         self.name = name
 
-    def __dict__(self):
+    def to_dict(self):
         return {"storage_name": self.name}
 
 
