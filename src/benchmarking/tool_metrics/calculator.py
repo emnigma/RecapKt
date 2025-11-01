@@ -8,7 +8,16 @@ from src.summarize_algorithms.core.models import DialogueState, MetricState, Ses
 
 
 class Calculator:
+    """
+    Class for run, evaluate (by compare with reference) and save results of llm's memory algorithms.
+    """
+
     def __init__(self, logger: BaseLogger, path_to_save: str | Path | None = None) -> None:
+        """
+        Initialization of Calculator class.
+        :param logger: the class for saving running and evaluating results.
+        :param path_to_save: path to save the result.
+        """
         self.path_to_save: str | Path | None = path_to_save
         self.logger = logger
 
@@ -20,6 +29,15 @@ class Calculator:
             reference_session: Session,
             count_of_sessions_to_evaluate: int = 0,
     ) -> list[dict[str, Any]]:
+        """
+        The main method for run and evaluate algorithm with the ast sessions.
+        :param algorithms: class that implements Dialog protocol.
+        :param evaluator_function: class inheritance of BaseEvaluator - for evaluating algorithm's results.
+        :param sessions: past user-tool-model interactions.
+        :param reference_session: reference session for comparing with algorithm's results.
+        :param count_of_sessions_to_evaluate: shows how many past interactions sessions should be used for memory.
+        :return: list[dict[str, Any]]: results of running and evaluating algorithm.
+        """
         assert count_of_sessions_to_evaluate < len(sessions),\
             "count_of_sessions_to_evaluate is greater then count of entire sessions."
 
