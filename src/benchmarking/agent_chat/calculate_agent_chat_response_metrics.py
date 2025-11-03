@@ -87,17 +87,17 @@ class CalculateAgentChatResponseMetrics:
         self.logger.info("Started computing base recsum response")
         base_recsum_response = self.base_recsum.process_dialogue(
             sessions, query
-        ).response
+        )
         self.logger.info("Started computing rag recsum response")
-        rag_recsum_response = self.rag_recsum.process_dialogue(sessions, query).response
+        rag_recsum_response = self.rag_recsum.process_dialogue(sessions, query)
         self.logger.info("Started computing base memory bank response")
         base_memory_bank_response = self.base_memory_bank.process_dialogue(
             sessions, query
-        ).response
+        )
         self.logger.info("Started computing rag memory bank response")
         rag_memory_bank_response = self.rag_memory_bank.process_dialogue(
             sessions, query
-        ).response
+        )
         self.logger.info("Started computing full session baseline response")
         full_sessions_baseline_response = self.full_baseline.process_dialogue(
             sessions, query, iteration
@@ -109,30 +109,30 @@ class CalculateAgentChatResponseMetrics:
 
         self.logger.info("Started computing base recsum single response score")
         base_recsum_single_score = self.llm_scorer.evaluate_single(
-            dialogue_context=dialogue_context, assistant_answer=base_recsum_response
+            dialogue_context=dialogue_context, assistant_answer=base_recsum_response.response
         )
         self.logger.info("Started computing rag recsum single response score")
         rag_recsum_single_score = self.llm_scorer.evaluate_single(
-            dialogue_context=dialogue_context, assistant_answer=rag_recsum_response
+            dialogue_context=dialogue_context, assistant_answer=rag_recsum_response.response
         )
         self.logger.info("Started computing base memory bank single response score")
         base_memory_bank_single_score = self.llm_scorer.evaluate_single(
             dialogue_context=dialogue_context,
-            assistant_answer=base_memory_bank_response,
+            assistant_answer=base_memory_bank_response.response,
         )
         self.logger.info("Started computing rag memory bank single response score")
         rag_memory_bank_single_score = self.llm_scorer.evaluate_single(
-            dialogue_context=dialogue_context, assistant_answer=rag_memory_bank_response
+            dialogue_context=dialogue_context, assistant_answer=rag_memory_bank_response.response
         )
         self.logger.info("Started computing full session single response score")
         full_sessions_baseline_single_score = self.llm_scorer.evaluate_single(
             dialogue_context=dialogue_context,
-            assistant_answer=full_sessions_baseline_response,
+            assistant_answer=full_sessions_baseline_response.response,
         )
         self.logger.info("Started computing last session single response score")
         last_session_baseline_single_score = self.llm_scorer.evaluate_single(
             dialogue_context=dialogue_context,
-            assistant_answer=last_session_baseline_response,
+            assistant_answer=last_session_baseline_response.response,
         )
 
 
@@ -169,7 +169,7 @@ class CalculateAgentChatResponseMetrics:
         self.logger.info("Started evaluate_pairwise")
         for var1, var2 in pairs:
             pairwise_score = self.llm_scorer.evaluate_pairwise(
-                dialogue_context=dialogue_context, first_answer=var1, second_answer=var2
+                dialogue_context=dialogue_context, first_answer=var1.response, second_answer=var2.response
             )
 
             mapping = {

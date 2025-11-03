@@ -12,7 +12,7 @@ from pydantic import SecretStr
 
 from src.benchmarking.baseline_logger import BaselineLogger
 from src.benchmarking.prompts import BASELINE_PROMPT
-from src.summarize_algorithms.core.models import OpenAIModels, Session, DialogueState
+from src.summarize_algorithms.core.models import DialogueState, OpenAIModels, Session
 
 
 class DialogueBaseline:
@@ -65,5 +65,7 @@ class DialogueBaseline:
         return DialogueState(
             dialogue_sessions=sessions,
             query=query,
-            _response=result
+            _response=result,
+            code_memory_storage=None,
+            tool_memory_storage=None
         )

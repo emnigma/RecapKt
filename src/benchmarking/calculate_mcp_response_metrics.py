@@ -97,7 +97,7 @@ class CalculateMCPResponseMetrics(CalculateMCPMetrics):
             baseline_response = self.baseline.process_dialogue(dialogue, query.content, self.message_count)
 
             self._update_semantic_scores(
-                recsum_response, baseline_response, ideal_response.content
+                recsum_response, baseline_response.response, ideal_response.content
             )
 
             context = str(dialogue[-1])
@@ -105,10 +105,10 @@ class CalculateMCPResponseMetrics(CalculateMCPMetrics):
             memory = "\n".join(memory_session)
 
             self._update_llm_single_scores(
-                recsum_response, baseline_response, context, memory
+                recsum_response, baseline_response.response, context, memory
             )
             self._update_llm_pairwise_scores(
-                context, memory, recsum_response, baseline_response
+                context, memory, recsum_response, baseline_response.response
             )
 
     def _update_semantic_scores(

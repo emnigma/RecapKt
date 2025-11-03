@@ -4,7 +4,7 @@ from typing import Any
 from src.benchmarking.base_logger import BaseLogger
 from src.benchmarking.tool_metrics.base_evaluator import BaseEvaluator
 from src.summarize_algorithms.core.dialog import Dialog
-from src.summarize_algorithms.core.models import DialogueState, MetricState, Session
+from src.summarize_algorithms.core.models import MetricState, Session
 
 
 class Calculator:
