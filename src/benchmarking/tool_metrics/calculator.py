@@ -26,8 +26,7 @@ class Calculator:
             algorithms: list[Dialog],
             evaluator_function: BaseEvaluator,
             sessions: list[Session],
-            reference_session: Session,
-            count_of_sessions_to_evaluate: int = 0,
+            reference_session: Session
     ) -> list[dict[str, Any]]:
         """
         The main method for run and evaluate algorithm with the ast sessions.
@@ -35,13 +34,8 @@ class Calculator:
         :param evaluator_function: class inheritance of BaseEvaluator - for evaluating algorithm's results.
         :param sessions: past user-tool-model interactions.
         :param reference_session: reference session for comparing with algorithm's results.
-        :param count_of_sessions_to_evaluate: shows how many past interactions sessions should be used for memory.
         :return: list[dict[str, Any]]: results of running and evaluating algorithm.
         """
-        assert count_of_sessions_to_evaluate < len(sessions),\
-            "count_of_sessions_to_evaluate is greater then count of entire sessions."
-
-        using_sessions: list[Session] = sessions[:count_of_sessions_to_evaluate]
         user_role_messages = reference_session.get_messages_by_role("USER")
         query = user_role_messages[-1]
 
@@ -54,8 +48,8 @@ class Calculator:
                 algorithm.__class__.__name__,
                 str(query),
                 1,
-                using_sessions,
-                state if isinstance(state, DialogueState) else None,
+                sessions,
+                state,
                 metric,
                 True
             )

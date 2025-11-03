@@ -64,9 +64,8 @@ def test_evaluate_success(fake_logger, fake_evaluator, fake_algorithm, sessions,
     results = calc.evaluate(
         algorithms=[fake_algorithm],
         evaluator_function=fake_evaluator,
-        sessions=sessions,
-        reference_session=reference_session,
-        count_of_sessions_to_evaluate=2
+        sessions=sessions[:1],
+        reference_session=reference_session
     )
 
     assert isinstance(results, list)
@@ -88,22 +87,19 @@ def test_raises_when_count_too_large(fake_logger, fake_evaluator, fake_algorithm
             algorithms=[fake_algorithm],
             evaluator_function=fake_evaluator,
             sessions=sessions,
-            reference_session=reference_session,
-            count_of_sessions_to_evaluate=len(sessions)
+            reference_session=reference_session
         )
 
 
 def test_uses_first_sessions(fake_logger, fake_evaluator, fake_algorithm, sessions, reference_session):
     calc = Calculator(logger=fake_logger)
 
-    count = 1
     calc.evaluate(
         algorithms=[fake_algorithm],
         evaluator_function=fake_evaluator,
-        sessions=sessions,
+        sessions=sessions[:0],
         reference_session=reference_session,
-        count_of_sessions_to_evaluate=count
     )
 
     used_sessions = fake_logger.log_iteration.call_args[0][3]
-    assert len(used_sessions) == count
+    assert len(used_sessions) == 1

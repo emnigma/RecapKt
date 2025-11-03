@@ -18,8 +18,8 @@ class BaseEvaluator(ABC):
             self,
             sessions: list[Session],
             query: BaseBlock,
-            state: DialogueState | str,
-            reference: BaseBlock | None = None
+            state: DialogueState,
+            reference: list[BaseBlock] | None = None
     ) -> MetricState:
         """
         Returns eval score of llm's answer with for query.
