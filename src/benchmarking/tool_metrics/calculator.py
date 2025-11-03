@@ -15,8 +15,8 @@ class Calculator:
     def __init__(self, logger: BaseLogger, path_to_save: str | Path | None = None) -> None:
         """
         Initialization of Calculator class.
-        :param logger: the class for saving running and evaluating results.
-        :param path_to_save: path to save the result.
+        :param logger: the class for saving results of running and evaluating algorithms.
+        :param path_to_save:
         """
         self.path_to_save: str | Path | None = path_to_save
         self.logger = logger
@@ -41,17 +41,16 @@ class Calculator:
 
         metrics: list[dict[str, Any]] = []
         for algorithm in algorithms:
-            state = algorithm.process_dialogue(sessions, str(query))
+            state = algorithm.process_dialogue(sessions, query.content)
             metric: MetricState = evaluator_function.evaluate(sessions, query, state)
 
             record: dict[str, Any] | None = self.logger.log_iteration(
                 algorithm.__class__.__name__,
-                str(query),
+                query.content,
                 1,
                 sessions,
                 state,
-                metric,
-                True
+                metric
             )
 
             assert record is not None, "logger didn't return a value"

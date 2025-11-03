@@ -77,4 +77,4 @@ def test_evaluate_success(fake_logger, fake_evaluator, fake_algorithm, sessions,
     fake_logger.log_iteration.assert_called_once()
 
     query_passed = fake_algorithm.process_dialogue.call_args[0][1]
-    assert query_passed == "USER: What is AI?"
+    assert query_passed == "What is AI?"

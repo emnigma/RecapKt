@@ -48,8 +48,7 @@ def test_log_iteration_creates_file(tmp_path, fake_state, sessions):
         iteration=1,
         sessions=sessions,
         state=fake_state,
-        metric=metric,
-        is_return=True,
+        metric=metric
     )
 
     assert isinstance(record, dict)
@@ -80,8 +79,7 @@ def test_log_iteration_without_metric(tmp_path, fake_state, sessions):
         iteration=2,
         sessions=sessions,
         state=fake_state,
-        metric=None,
-        is_return=True,
+        metric=None
     )
 
     assert "metric_name" not in record

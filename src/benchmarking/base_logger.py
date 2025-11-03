@@ -28,9 +28,8 @@ class BaseLogger(ABC):
             iteration: int,
             sessions: list[Session],
             state: DialogueState | None,
-            metric: MetricState | None = None,
-            is_return: bool = False
-    ) -> None | dict[str, Any]:
+            metric: MetricState | None = None
+    ) -> dict[str, Any]:
         ...
 
     @staticmethod

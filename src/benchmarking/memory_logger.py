@@ -15,22 +15,20 @@ class MemoryLogger(BaseLogger):
             iteration: int,
             sessions: list[Session],
             state: DialogueState | None,
-            metric: MetricState | None = None,
-            is_return: bool = False
-    ) -> None | dict[str, Any]:
+            metric: MetricState | None = None
+    ) -> dict[str, Any]:
         self.logger.info(f"Logging iteration {iteration} to {self.log_dir}")
 
         if state is None:
             raise ValueError("'state' argument is necessary for MemoryLogger")
 
-        penis = MemoryLogger._serialize_memories(state)
         record = {
             "timestamp": datetime.now().isoformat(),
             "iteration": iteration,
             "system": system_name,
             "query": query,
             "response": getattr(state, "response", None),
-            "memory": penis,
+            "memory": MemoryLogger._serialize_memories(state),
             "sessions": [s.to_dict() for s in sessions],
         }
 
@@ -44,5 +42,4 @@ class MemoryLogger(BaseLogger):
 
         self.logger.info(f"Saved successfully iteration {iteration} to {self.log_dir}")
 
-        if is_return:
-            return record
+        return record

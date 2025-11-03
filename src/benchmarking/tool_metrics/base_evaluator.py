@@ -10,7 +10,7 @@ from src.summarize_algorithms.core.models import (
 
 class BaseEvaluator(ABC):
     """
-    Abstract base class for functions that evaluates llm's memory algorithms.
+    Base class for functions that evaluates llm's memory algorithms.
     """
 
     @abstractmethod
@@ -23,9 +23,9 @@ class BaseEvaluator(ABC):
     ) -> MetricState:
         """
         Returns eval score of llm's answer with for query.
-        :param sessions: last user's sessions.
+        :param sessions: previous user's sessions (other chats or contexts).
         :param query: the last user's query which response is evaluating.
-        :param state: answer of model.
+        :param state: history of interactions with model's answer of the query.
         :param reference: reference model's answer.
         :return: MetricState: dataclass with information about evaluation (metric's name and score).
         """

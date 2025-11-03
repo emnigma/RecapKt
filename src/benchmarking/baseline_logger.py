@@ -15,9 +15,8 @@ class BaselineLogger(BaseLogger):
             iteration: int,
             sessions: list[Session],
             state: DialogueState | None = None,
-            metric: MetricState | None = None,
-            is_return: bool = False
-    ) -> None | dict[str, Any]:
+            metric: MetricState | None = None
+    ) -> dict[str, Any]:
         self.logger.info(f"Logging iteration {iteration} to {self.log_dir}")
 
         record = {
@@ -34,5 +33,4 @@ class BaselineLogger(BaseLogger):
 
         self.logger.info(f"Saved successfully iteration {iteration} to {self.log_dir}")
 
-        if is_return:
-            return record
+        return record
