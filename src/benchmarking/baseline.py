@@ -15,7 +15,7 @@ from src.benchmarking.prompts import BASELINE_PROMPT
 from src.summarize_algorithms.core.models import DialogueState, OpenAIModels, Session
 
 
-class DialogueBaseline:
+class DialogueBaseline(Dialog):
     def __init__(self, system_name: str, llm: Optional[BaseChatModel] = None) -> None:
         load_dotenv()
 
