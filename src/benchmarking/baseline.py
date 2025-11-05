@@ -12,6 +12,7 @@ from pydantic import SecretStr
 
 from src.benchmarking.baseline_logger import BaselineLogger
 from src.benchmarking.prompts import BASELINE_PROMPT
+from src.summarize_algorithms.core.dialog import Dialog
 from src.summarize_algorithms.core.models import DialogueState, OpenAIModels, Session
 
 
@@ -41,6 +42,7 @@ class DialogueBaseline(Dialog):
     def _build_chain(self) -> Runnable[dict[str, Any], str]:
         return self.prompt_template | self.llm | StrOutputParser()
 
+    #TODO remove iteration argument and logging
     def process_dialogue(self, sessions: List[Session], query: str, iteration: int | None = None) -> DialogueState:
         context_messages = []
         for session in sessions:
