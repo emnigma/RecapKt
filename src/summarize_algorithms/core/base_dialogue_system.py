@@ -126,6 +126,12 @@ class BaseDialogueSystem(ABC):
 
         self.iteration += 1
         system_name = self.__class__.__name__
-        self.memory_logger.log_iteration(system_name, query, self.state, self.iteration, sessions)
+        self.memory_logger.log_iteration(
+            system_name,
+            query,
+            self.iteration,
+            sessions,
+            self.state,
+        )
 
         return self.state if self.state is not None else initial_state

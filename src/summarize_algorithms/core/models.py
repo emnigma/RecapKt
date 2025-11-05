@@ -145,6 +145,17 @@ class MemoryBankDialogueState(DialogueState):
     text_memory_storage: MemoryStorage = field(default_factory=MemoryStorage)
 
 
+class MetricType(Enum):
+    COHERENCE = "coherence"
+
+
+@dataclass_json
+@dataclass
+class MetricState:
+    metric: MetricType
+    value: float | int
+
+
 class WorkflowNode(Enum):
     UPDATE_MEMORY = "update_memory"
     GENERATE_RESPONSE = "generate_response"
@@ -153,3 +164,5 @@ class WorkflowNode(Enum):
 class UpdateState(Enum):
     CONTINUE_UPDATE = "continue_update"
     FINISH_UPDATE = "finish_update"
+
+

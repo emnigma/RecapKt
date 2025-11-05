@@ -12,10 +12,11 @@ from pydantic import SecretStr
 
 from src.benchmarking.baseline_logger import BaselineLogger
 from src.benchmarking.prompts import BASELINE_PROMPT
-from src.summarize_algorithms.core.models import OpenAIModels, Session
+from src.summarize_algorithms.core.dialog import Dialog
+from src.summarize_algorithms.core.models import DialogueState, OpenAIModels, Session
 
 
-class DialogueBaseline:
+class DialogueBaseline(Dialog):
     def __init__(self, system_name: str, llm: Optional[BaseChatModel] = None) -> None:
         load_dotenv()
 
@@ -41,7 +42,8 @@ class DialogueBaseline:
     def _build_chain(self) -> Runnable[dict[str, Any], str]:
         return self.prompt_template | self.llm | StrOutputParser()
 
-    def process_dialogue(self, sessions: List[Session], query: str, iteration: int | None = None) -> str:
+    #TODO remove iteration argument and logging
+    def process_dialogue(self, sessions: List[Session], query: str, iteration: int | None = None) -> DialogueState:
         context_messages = []
         for session in sessions:
             for message in session.messages:
@@ -62,4 +64,10 @@ class DialogueBaseline:
                 sessions=sessions
             )
 
-        return result
+        return DialogueState(
+            dialogue_sessions=sessions,
+            query=query,
+            _response=result,
+            code_memory_storage=None,
+            tool_memory_storage=None
+        )
