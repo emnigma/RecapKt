@@ -100,11 +100,11 @@ class CalculateAgentChatResponseMetrics:
         )
         self.logger.info("Started computing full session baseline response")
         full_sessions_baseline_response = self.full_baseline.process_dialogue(
-            sessions, query, iteration
+            sessions, query, iteration=iteration
         )
         self.logger.info("Started computing last session baseline response")
         last_session_baseline_response = self.last_baseline.process_dialogue(
-            [sessions[-1]], query, iteration
+            [sessions[-1]], query, iteration=iteration
         )
 
         self.logger.info("Started computing base recsum single response score")

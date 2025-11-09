@@ -28,7 +28,7 @@ class BaseLogger(ABC):
             iteration: int,
             sessions: list[Session],
             state: DialogueState | None,
-            metric: MetricState | None = None
+            metrics: list[MetricState] | None = None
     ) -> dict[str, Any]:
         ...
 

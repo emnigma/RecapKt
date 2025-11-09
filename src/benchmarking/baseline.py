@@ -39,18 +39,58 @@ class DialogueBaseline(Dialog):
 
         self.baseline_logger = BaselineLogger()
 
-    def _build_chain(self) -> Runnable[dict[str, Any], str]:
+    def _build_chain(
+            self,
+            structure: dict[str, Any] | None = None,
+            tools: dict[str, Any] | None = None
+    ) -> Runnable:
+        if structure and not tools:
+            structured_llm = self.llm.with_structured_output(structure)
+            return self.prompt_template | structured_llm
+
+        if tools and not structure:
+            llm_with_tools = self.llm.bind_tools(tools)
+            return self.prompt_template | llm_with_tools
+
+        if tools and structure:
+            tools = [DialogueBaseline._get_return_action_plan(structure), *tools]
+            llm_with_tools = self.llm.bind_tools(tools)
+            return self.prompt_template | llm_with_tools
+
         return self.prompt_template | self.llm | StrOutputParser()
 
+    @staticmethod
+    def _get_return_action_plan(structure):
+        return {
+            "type": "function",
+            "function": {
+                "name": "return_action_plan",
+                "description": "Return the final JSON action plan strictly matching the schema.",
+                "parameters": structure,
+            },
+        }
+
     #TODO remove iteration argument and logging
-    def process_dialogue(self, sessions: List[Session], query: str, iteration: int | None = None) -> DialogueState:
+    def process_dialogue(
+            self,
+            sessions: List[Session],
+            query: str,
+            structure: dict[str, Any] | None = None,
+            tools: dict[str, Any] | None = None,
+            iteration: int | None = None
+    ) -> DialogueState:
+        if structure is not None or tools is not None:
+            chain = self._build_chain(structure, tools)
+        else:
+            chain = self.chain
+
         context_messages = []
         for session in sessions:
             for message in session.messages:
                 context_messages.append(f"{message.role}: {message.content}")
         context = "\n".join(context_messages)
         with get_openai_callback() as cb:
-            result = self.chain.invoke({"context": context, "query": query})
+            result = chain.invoke({"context": context, "query": query})
 
             self.prompt_tokens += cb.prompt_tokens
             self.completion_tokens += cb.completion_tokens

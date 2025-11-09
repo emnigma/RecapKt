@@ -15,7 +15,7 @@ class MemoryLogger(BaseLogger):
             iteration: int,
             sessions: list[Session],
             state: DialogueState | None,
-            metric: MetricState | None = None
+            metrics: list[MetricState] | None = None
     ) -> dict[str, Any]:
         self.logger.info(f"Logging iteration {iteration} to {self.log_dir}")
 
@@ -32,9 +32,12 @@ class MemoryLogger(BaseLogger):
             "sessions": [s.to_dict() for s in sessions],
         }
 
-        if metric is not None:
-            record["metric_name"] = metric.metric.value
-            record["metric_value"] = metric.value
+        if metrics is not None:
+            metrics_dict = [
+                {"metric_name": metric.metric.value, "metric_value": metric.value}
+                for metric in metrics
+            ]
+            record["metric"] = metrics_dict
 
         with open(self.log_dir / (system_name + str(iteration) + ".jsonl"), "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False, indent=4))

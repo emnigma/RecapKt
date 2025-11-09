@@ -16,6 +16,7 @@ from langgraph.graph.state import CompiledStateGraph
 from pydantic import SecretStr
 
 from src.benchmarking.memory_logger import MemoryLogger
+from src.summarize_algorithms.core.dialog import Dialog
 from src.summarize_algorithms.core.graph_nodes import (
     UpdateState,
     generate_response_node,
@@ -32,7 +33,7 @@ from src.summarize_algorithms.core.prompts import RESPONSE_GENERATION_PROMPT
 from src.summarize_algorithms.core.response_generator import ResponseGenerator
 
 
-class BaseDialogueSystem(ABC):
+class BaseDialogueSystem(ABC, Dialog):
     def __init__(
         self,
         llm: Optional[BaseChatModel] = None,
@@ -53,9 +54,6 @@ class BaseDialogueSystem(ABC):
             raise ValueError("OPENAI_API_KEY environment variable is not loaded")
 
         self.summarizer = self._build_summarizer()
-        self.response_generator = ResponseGenerator(
-            self.llm, self._get_response_prompt_template()
-        )
         self.graph = self._build_graph()
         self.state: Optional[DialogueState] = None
         self.embed_code = embed_code
@@ -86,7 +84,15 @@ class BaseDialogueSystem(ABC):
     def _get_dialogue_state_class(self) -> Type[DialogueState]:
         pass
 
-    def _build_graph(self) -> CompiledStateGraph:
+    def _build_graph(
+            self,
+            structure: dict[str, Any] | None = None,
+            tools: dict[str, Any] | None = None
+    ) -> CompiledStateGraph:
+        self.response_generator = ResponseGenerator(
+            self.llm, self._get_response_prompt_template(), structure, tools
+        )
+
         workflow = StateGraph(self._get_dialogue_state_class)
 
         workflow.add_node(
@@ -113,11 +119,22 @@ class BaseDialogueSystem(ABC):
 
         return workflow.compile()
 
-    def process_dialogue(self, sessions: list[Session], query: str) -> DialogueState:
+    def process_dialogue(
+            self,
+            sessions: list[Session],
+            query: str,
+            structure: dict[str, Any] | None = None,
+            tools: dict[str, Any] | None = None
+    ) -> DialogueState:
+        if structure is not None or tools is not None:
+            graph = self._build_graph(structure, tools)
+        else:
+            graph = self.graph
+
         initial_state = self._get_initial_state(sessions, query)
         with get_openai_callback() as cb:
             self.state = self._get_dialogue_state_class(
-                **self.graph.invoke(initial_state)
+                **graph.invoke(initial_state)
             )
 
             self.prompt_tokens += cb.prompt_tokens

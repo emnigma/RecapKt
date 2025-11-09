@@ -63,9 +63,9 @@ def test_evaluate_success(fake_logger, fake_evaluator, fake_algorithm, sessions,
 
     results = calc.evaluate(
         algorithms=[fake_algorithm],
-        evaluator_function=fake_evaluator,
+        evaluator_functions=fake_evaluator,
         sessions=sessions[:1],
-        reference_session=reference_session
+        reference=reference_session
     )
 
     assert isinstance(results, list)
