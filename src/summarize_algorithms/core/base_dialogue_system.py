@@ -87,7 +87,7 @@ class BaseDialogueSystem(ABC, Dialog):
     def _build_graph(
             self,
             structure: dict[str, Any] | None = None,
-            tools: dict[str, Any] | None = None
+            tools: list[dict[str, Any]] | None = None
     ) -> CompiledStateGraph:
         self.response_generator = ResponseGenerator(
             self.llm, self._get_response_prompt_template(), structure, tools
@@ -124,7 +124,7 @@ class BaseDialogueSystem(ABC, Dialog):
             sessions: list[Session],
             query: str,
             structure: dict[str, Any] | None = None,
-            tools: dict[str, Any] | None = None
+            tools: list[dict[str, Any]] | None = None
     ) -> DialogueState:
         if structure is not None or tools is not None:
             graph = self._build_graph(structure, tools)

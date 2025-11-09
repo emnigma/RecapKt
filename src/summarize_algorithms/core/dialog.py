@@ -9,6 +9,6 @@ class Dialog(Protocol):
             sessions: list[Session],
             query: str,
             structure: dict[str, Any] | None = None,
-            tools: dict[str, Any] | None = None
+            tools: list[dict[str, Any]] | None = None
     ) -> DialogueState:
         ...

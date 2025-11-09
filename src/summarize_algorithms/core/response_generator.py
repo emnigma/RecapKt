@@ -10,7 +10,7 @@ class ResponseGenerator:
                  llm: BaseChatModel,
                  prompt_template: PromptTemplate,
                  structure: dict[str, Any] | None = None,
-                 tools: dict[str, Any] | None = None
+                 tools: list[dict[str, Any]] | None = None
                  ) -> None:
         self._llm = llm
         self._prompt_template = prompt_template

@@ -17,35 +17,34 @@ class Calculator:
             algorithms: list[Dialog],
             evaluator_functions: list[BaseEvaluator],
             sessions: list[Session],
-            query: BaseBlock,
+            prompt: str,
             reference: list[BaseBlock],
-            logger: BaseLogger
+            logger: BaseLogger,
+            tools: list[dict[str, Any]] | None = None
     ) -> list[dict[str, Any]]:
         """
         The main method for run and evaluate algorithm with the ast sessions.
         :param algorithms: class that implements Dialog protocol.
         :param evaluator_functions: list of class inheritances of BaseEvaluator - for evaluating algorithm's results.
         :param sessions: past user-tool-model interactions.
-        :param query: BaseBlock with role 'USER' - the last query for model for comparing results
+        :param prompt: the query for model for comparing results
         :param reference: reference model's response for comparing with algorithm's results.
         :param logger: the class for saving results of running and evaluating algorithms.
+        :param tools: tools/functions description for function calling.
         :return: list[dict[str, Any]]: results of running and evaluating algorithm.
         """
-        assert query.role == "USER", "query should be BaseBlock with the role 'USER'"
-
         metrics: list[dict[str, Any]] = []
         for algorithm in algorithms:
-            prompt = Calculator.__prepare_query_for_the_first_stage(query)
-            state = algorithm.process_dialogue(sessions, prompt, PLAN_SCHEMA)
+            state = algorithm.process_dialogue(sessions, prompt, PLAN_SCHEMA, tools)
 
             algorithm_metrics: list[MetricState] = []
             for evaluator_function in evaluator_functions:
-                metric: MetricState = evaluator_function.evaluate(sessions, query, state, reference)
+                metric: MetricState = evaluator_function.evaluate(sessions, prompt, state, reference)
                 algorithm_metrics.append(metric)
 
             record: dict[str, Any] = logger.log_iteration(
                 algorithm.__class__.__name__,
-                query.content,
+                prompt,
                 1,
                 sessions,
                 state,
@@ -55,7 +54,3 @@ class Calculator:
             metrics.append(record)
 
         return metrics
-
-    @staticmethod
-    def __prepare_query_for_the_first_stage(query: BaseBlock) -> str:
-        return PLAN_PROMPT.format(query.content)

@@ -42,7 +42,7 @@ class DialogueBaseline(Dialog):
     def _build_chain(
             self,
             structure: dict[str, Any] | None = None,
-            tools: dict[str, Any] | None = None
+            tools: list[dict[str, Any]] | None = None
     ) -> Runnable:
         if structure and not tools:
             structured_llm = self.llm.with_structured_output(structure)
@@ -76,7 +76,7 @@ class DialogueBaseline(Dialog):
             sessions: List[Session],
             query: str,
             structure: dict[str, Any] | None = None,
-            tools: dict[str, Any] | None = None,
+            tools: list[dict[str, Any]] | None = None,
             iteration: int | None = None
     ) -> DialogueState:
         if structure is not None or tools is not None:

@@ -6,7 +6,14 @@ from typing import Any
 from src.summarize_algorithms.core.models import BaseBlock, Session, ToolCallBlock
 
 
-class SessionLoader:
+class Loader:
+    @staticmethod
+    def load_func_tools(path: Path | str) -> list[dict[str, Any]]:
+        with open(path, encoding="utf-8") as f:
+            data: list[dict[str, Any]] = json.load(f)
+
+        return data
+
     @staticmethod
     def load_session(path: Path | str) -> Session:
         result: list[BaseBlock] = []
@@ -45,7 +52,7 @@ class SessionLoader:
                             dict_block = data[i]
                             block_type = dict_block["type"]
 
-                        blocks = SessionLoader._process_tool_calls(tool_calls, tool_responses)
+                        blocks = Loader._process_tool_calls(tool_calls, tool_responses)
                         result.extend(blocks)
 
                 elif block_type == "tool_response":
