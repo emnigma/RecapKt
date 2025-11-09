@@ -114,7 +114,7 @@ class Runner:
 if __name__ == "__main__":
     runner = Runner()
     runner.run(
-        dir_path=Path("/Users/mikhailkharlamov/Documents/Explyt/create-agents-md"),
+        dir_path=Path("/Users/mikhailkharlamov/Documents/.../create-agents-md"),
         session_file="chat_20251022_001157_763_6010.messages.json",
         tools_description="chat_20251022_001157_763_6010.tools.json"
     )
