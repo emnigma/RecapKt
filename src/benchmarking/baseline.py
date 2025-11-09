@@ -70,14 +70,12 @@ class DialogueBaseline(Dialog):
             },
         }
 
-    #TODO remove iteration argument and logging
     def process_dialogue(
             self,
             sessions: List[Session],
             query: str,
             structure: dict[str, Any] | None = None,
             tools: list[dict[str, Any]] | None = None,
-            iteration: int | None = None
     ) -> DialogueState:
         if structure is not None or tools is not None:
             chain = self._build_chain(structure, tools)
@@ -95,14 +93,6 @@ class DialogueBaseline(Dialog):
             self.prompt_tokens += cb.prompt_tokens
             self.completion_tokens += cb.completion_tokens
             self.total_cost += cb.total_cost
-
-        if iteration is not None:
-            self.baseline_logger.log_iteration(
-                system_name=self.system_name,
-                query=query,
-                iteration=iteration,
-                sessions=sessions
-            )
 
         return DialogueState(
             dialogue_sessions=sessions,

@@ -1,9 +1,5 @@
-from langchain_core.prompts import PromptTemplate
+**Instruction: Return a Strict JSON Action Plan**
 
-PLAN_PROMPT = PromptTemplate.from_template(
-    """
-    **Instruction: Return a Strict JSON Action Plan**
-    
     **You are given:**
         •	A multi-session conversation between a user and an LLM, including prior tool calls and results.
         •	A catalog of available tools/functions with their argument specifications.
@@ -105,15 +101,13 @@ PLAN_PROMPT = PromptTemplate.from_template(
           "name": "compose_answer",
           "description": "Draft final response with selected flight and baggage summary.",
           "depends_on": ["s3", "s4"],
-          "answer_template": "Flight: {{flight_summary_from_s3}}. Baggage: {{baggage_points_from_s4}}. Note surge pricing.",
+          "answer_template": "Flight: {flight_summary_from_s3}. Baggage: {baggage_points_from_s4}. Note surge pricing.",
           "collect_from": ["s3", "s4"]
         }
       ]
     }
     **Return Format**
         •	Return only the JSON object. No Markdown, no preamble, no postscript.
-    
+
     **Here is a user request, in response to which you need to make an action plan:**
-    {query}
-    """
-)
+    {{ query }}

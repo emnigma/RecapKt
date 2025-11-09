@@ -20,53 +20,46 @@ class Loader:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
 
-            i = 0
-            while i < len(data):
-                dict_block = data[i]
-                block_type = dict_block["type"]
+        i = 0
+        while i < len(data):
+            dict_block = data[i]
+            block_type = dict_block["type"]
 
-                if block_type in ("user", "system"):
-                    block = BaseBlock(
-                        role=block_type.upper(),
-                        content=dict_block["content"]
-                    )
-                    result.append(block)
+            if block_type in ("user", "system"):
+                block = BaseBlock(
+                    role=block_type.upper(),
+                    content=dict_block["content"]
+                )
+                result.append(block)
+                i += 1
+
+            elif block_type == "assistant":
+                block = BaseBlock(
+                    role=block_type.upper(),
+                    content=dict_block["content"]
+                )
+                result.append(block)
+
+                tool_calls = dict_block.get("toolCalls", [])
+                if tool_calls:
                     i += 1
+                    blocks = Loader._process_tool_calls(tool_calls, data[i].get("toolResponses", []))
+                    result.extend(blocks)
 
-                elif block_type == "assistant":
-                    block = BaseBlock(
-                        role=block_type.upper(),
-                        content=dict_block["content"]
-                    )
-                    result.append(block)
+                i += 1
 
-                    tool_calls = dict_block.get("toolCalls", [])
-                    if tool_calls:
-                        i += 1
-                        dict_block = data[i]
-                        block_type = dict_block["type"]
-                        tool_responses: list[dict[str, Any]] = []
-                        while block_type == "tool_response":
-                            tool_responses.append(dict_block)
-                            i += 1
-                            dict_block = data[i]
-                            block_type = dict_block["type"]
+            elif block_type == "tool_response":
+                i += 1
 
-                        blocks = Loader._process_tool_calls(tool_calls, tool_responses)
-                        result.extend(blocks)
+            else:
+                block = BaseBlock(
+                    role=block_type.upper(),
+                    content=str(dict_block.get("content", ""))
+                )
+                result.append(block)
+                i += 1
 
-                elif block_type == "tool_response":
-                    i += 1
-
-                else:
-                    block = BaseBlock(
-                        role=block_type.upper(),
-                        content=str(dict_block.get("content", ""))
-                    )
-                    result.append(block)
-                    i += 1
-
-                return Session(result)
+        return Session(result)
 
     @staticmethod
     def _process_tool_calls(
@@ -76,14 +69,20 @@ class Loader:
         blocks: list[ToolCallBlock] = []
         for call in tool_calls:
             for tool_response in tool_responses:
+                response = tool_response["response"]
                 if call["id"] == tool_response["id"]:
+                    if response["result"] == "failure":
+                        content = response["failure"]
+                    else:
+                        content = response["content"]
+
                     block = ToolCallBlock(
-                        role="ASSISTANT",
-                        content=tool_response["response"]["content"],
+                        role="TOOL_RESPONSE",
+                        content=content,
                         id=call["id"],
                         name=call["name"],
                         arguments=call["arguments"],
-                        response=tool_response["result"]
+                        response=response["result"]
                     )
                     blocks.append(block)
         return blocks

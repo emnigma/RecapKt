@@ -3,7 +3,6 @@ from typing import Any
 from src.benchmarking.base_logger import BaseLogger
 from src.benchmarking.tool_metrics.evaluators.base_evaluator import BaseEvaluator
 from src.benchmarking.tool_metrics.json_schemas import PLAN_SCHEMA
-from src.benchmarking.tool_metrics.prompts import PLAN_PROMPT
 from src.summarize_algorithms.core.dialog import Dialog
 from src.summarize_algorithms.core.models import BaseBlock, MetricState, Session
 
