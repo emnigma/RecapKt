@@ -26,49 +26,27 @@ class Runner:
             trim_blocks=True
         )
 
-    def run(self, dir_path: Path, session_file: Path | str, tools_description: Path | str) -> None:
+    def run(self, dir_path: Path, session_file: Path | str) -> None:
         memory_logger = MemoryLogger()
         baseline_logger = BaselineLogger()
 
         base_recsum = RecsumDialogueSystem(embed_code=False, embed_tool=False)
-        rag_recsum = RecsumDialogueSystem(embed_code=True, embed_tool=True)
-
         base_memory_bank = MemoryBankDialogueSystem(embed_code=False, embed_tool=False)
-        rag_memory_bank = MemoryBankDialogueSystem(embed_code=True, embed_tool=True)
-
-        full_baseline = DialogueBaseline("FullBaseline")
-        last_baseline = DialogueBaseline("LastBaseline")
+        baseline = DialogueBaseline("FullBaseline")
 
         algorithms_with_memory = [
             base_recsum,
-            rag_recsum,
-            base_memory_bank,
-            rag_memory_bank
+            base_memory_bank
         ]
-
-        baseline_algorithms = [
-            full_baseline,
-            last_baseline
-        ]
+        baseline_algorithms = [baseline]
 
         past_interactions = Loader.load_session(dir_path / session_file)
-        tools = Loader.load_func_tools(dir_path / tools_description)
 
         query_and_reference = self.__execute_query_and_reference(past_interactions)
         query, reference = query_and_reference.query, query_and_reference.reference
         prompt = self.__prepare_query_for_the_first_stage(query)
 
         simple_evaluator = SimpleEvaluator()
-
-        memory_metrics = Calculator.evaluate(
-            algorithms_with_memory,
-            [simple_evaluator],
-            [past_interactions],
-            prompt,
-            reference,
-            memory_logger,
-            tools
-        )
 
         baseline_metrics = Calculator.evaluate(
             baseline_algorithms,
@@ -77,7 +55,17 @@ class Runner:
             prompt,
             reference,
             baseline_logger,
-            tools
+            None
+        )
+
+        memory_metrics = Calculator.evaluate(
+            algorithms_with_memory,
+            [simple_evaluator],
+            [past_interactions],
+            prompt,
+            reference,
+            memory_logger,
+            None
         )
 
         print(memory_metrics)
@@ -115,6 +103,5 @@ if __name__ == "__main__":
     runner = Runner()
     runner.run(
         dir_path=Path("/Users/mikhailkharlamov/Documents/.../create-agents-md"),
-        session_file="chat_20251022_001157_763_6010.messages.json",
-        tools_description="chat_20251022_001157_763_6010.tools.json"
+        session_file="chat_20251022_001157_763_6010.messages.json"
     )

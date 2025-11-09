@@ -1,4 +1,6 @@
 PLAN_SCHEMA = {
+  "title": "ActionPlan",
+  "description": "Schema for the structured action plan output from the agent",
   "type": "object",
   "additionalProperties": False,
   "required": ["version", "user_request", "memory_used", "assumptions", "plan_steps"],
