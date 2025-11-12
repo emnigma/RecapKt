@@ -1,0 +1,115 @@
+import logging
+from pathlib import Path
+from typing import Any
+
+from jinja2 import Environment, FileSystemLoader
+
+from src.benchmarking.baseline import DialogueBaseline
+from src.benchmarking.baseline_logger import BaselineLogger
+from src.benchmarking.memory_logger import MemoryLogger
+from src.benchmarking.tool_metrics.calculator import Calculator
+from src.benchmarking.tool_metrics.evaluators.f1_tool_evaluator import F1ToolEvaluator
+from src.benchmarking.tool_metrics.load_session import Loader
+from src.benchmarking.tool_metrics.utils import QueryAndReference
+from src.summarize_algorithms.core.models import BaseBlock, Session
+from src.summarize_algorithms.memory_bank.dialogue_system import (
+    MemoryBankDialogueSystem,
+)
+from src.summarize_algorithms.recsum.dialogue_system import RecsumDialogueSystem
+
+
+class Runner:
+    def __init__(self, templates_dir: str = "prompts") -> None:
+        self.logger = logging.getLogger()
+        self.env = Environment(
+            loader=FileSystemLoader(templates_dir),
+            autoescape=True,
+            trim_blocks=True
+        )
+
+    def run(self, dir_path: Path, session_file: Path | str) -> None:
+        memory_logger = MemoryLogger()
+        baseline_logger = BaselineLogger()
+
+        base_recsum = RecsumDialogueSystem(embed_code=False, embed_tool=False)
+        base_memory_bank = MemoryBankDialogueSystem(embed_code=False, embed_tool=False)
+        baseline = DialogueBaseline("FullBaseline")
+
+        algorithms_with_memory = [
+            base_recsum,
+            base_memory_bank
+        ]
+        baseline_algorithms = [baseline]
+
+        past_interactions = Loader.load_session(dir_path / session_file)
+
+        query_and_reference = self.__execute_query_and_reference(past_interactions)
+        query, reference = query_and_reference.query, query_and_reference.reference
+        prompt = self.__prepare_query_for_the_first_stage(query)
+
+        f1_tool_evaluator = F1ToolEvaluator()
+
+        baseline_metrics = Calculator.evaluate(
+            baseline_algorithms,
+            [f1_tool_evaluator],
+            [past_interactions],
+            prompt,
+            reference,
+            baseline_logger,
+            None
+        )
+
+        memory_metrics = Calculator.evaluate(
+            algorithms_with_memory,
+            [f1_tool_evaluator],
+            [past_interactions],
+            prompt,
+            reference,
+            memory_logger,
+            None
+        )
+
+        Runner.__print_metrics([*baseline_metrics, *memory_metrics])
+
+    def __execute_query_and_reference(self, past_interactions: Session) -> QueryAndReference:
+        reference: list[BaseBlock] = []
+        query: BaseBlock | None = None
+        for i in range(len(past_interactions.messages) - 1, -1, -1):
+            if past_interactions.messages[i].role == "USER" and past_interactions.messages[i].content != "":
+                self.logger.info(f"User founded {i}")
+                self.logger.info(f"User message: {past_interactions.messages[i].content}")
+                query = past_interactions.messages[i]
+                break
+            else:
+                reference.append(past_interactions.messages[i])
+
+        assert query is not None, "User's query is not founded."
+
+        reference = reference[::-1]
+
+        return QueryAndReference(
+            query=query,
+            reference=reference
+        )
+
+    def __prepare_query_for_the_first_stage(self, query: BaseBlock) -> str:
+        template = self.env.get_template("first_stage.j2")
+        rendered_prompt = template.render(query=query.content)
+        return rendered_prompt
+
+    @staticmethod
+    def __print_metrics(log_records: list[dict[str, Any]]) -> None:
+        for record in log_records:
+            print(f"System: {record['system']}")
+            print("Metrics:")
+            for metric in record.get("metric"):
+                print(f"  - {metric.get("metric_name")}: {metric.get("metric_value")}")
+            print("\n")
+
+
+if __name__ == "__main__":
+    runner = Runner()
+    runner.run(
+        dir_path=Path("/Users/mikhailkharlamov/Documents/.../create-agents-md"),
+        session_file="chat_20251022_001157_763_6010.messages.json"
+    )

@@ -24,15 +24,15 @@ def response_generator(mock_llm, mock_prompt_template):
 
 
 def test_initialization(response_generator, mock_llm, mock_prompt_template):
-    assert response_generator.llm is mock_llm
-    assert response_generator.prompt_template is mock_prompt_template
+    assert response_generator._llm is mock_llm
+    assert response_generator._prompt_template is mock_prompt_template
     assert hasattr(response_generator, "chain")
 
 
 def test_generate_response_success(response_generator):
     mock_chain = MagicMock()
     mock_chain.invoke.return_value = "Test response"
-    response_generator.chain = mock_chain
+    response_generator._chain = mock_chain
 
     result = response_generator.generate_response(
         dialogue_memory="Memory content",
@@ -66,7 +66,7 @@ def test_argument_combinations(
 ):
     mock_chain = MagicMock()
     mock_chain.invoke.return_value = "Response"
-    response_generator.chain = mock_chain
+    response_generator._chain = mock_chain
 
     response_generator.generate_response(
         dialogue_memory, code_memory, tool_memory, query
@@ -84,7 +84,7 @@ def test_argument_combinations(
 def test_generate_response_exception(response_generator):
     mock_chain = MagicMock()
     mock_chain.invoke.side_effect = Exception("Network error")
-    response_generator.chain = mock_chain
+    response_generator._chain = mock_chain
 
     with pytest.raises(ConnectionError) as exc_info:
         response_generator.generate_response("dmem", "cmem", "tmem", "q")

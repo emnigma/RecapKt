@@ -1,59 +1,54 @@
-from pathlib import Path
 from typing import Any
 
 from src.benchmarking.base_logger import BaseLogger
-from src.benchmarking.tool_metrics.base_evaluator import BaseEvaluator
+from src.benchmarking.tool_metrics.evaluators.base_evaluator import BaseEvaluator
+from src.benchmarking.tool_metrics.json_schemas import PLAN_SCHEMA
 from src.summarize_algorithms.core.dialog import Dialog
-from src.summarize_algorithms.core.models import MetricState, Session
+from src.summarize_algorithms.core.models import BaseBlock, MetricState, Session
 
 
 class Calculator:
     """
     Class for run, evaluate (by compare with reference) and save results of llm's memory algorithms.
     """
-
-    def __init__(self, logger: BaseLogger, path_to_save: str | Path | None = None) -> None:
-        """
-        Initialization of Calculator class.
-        :param logger: the class for saving results of running and evaluating algorithms.
-        :param path_to_save:
-        """
-        self.path_to_save: str | Path | None = path_to_save
-        self.logger = logger
-
+    @staticmethod
     def evaluate(
-            self,
             algorithms: list[Dialog],
-            evaluator_function: BaseEvaluator,
+            evaluator_functions: list[BaseEvaluator],
             sessions: list[Session],
-            reference_session: Session
+            prompt: str,
+            reference: list[BaseBlock],
+            logger: BaseLogger,
+            tools: list[dict[str, Any]] | None = None
     ) -> list[dict[str, Any]]:
         """
         The main method for run and evaluate algorithm with the ast sessions.
         :param algorithms: class that implements Dialog protocol.
-        :param evaluator_function: class inheritance of BaseEvaluator - for evaluating algorithm's results.
+        :param evaluator_functions: list of class inheritances of BaseEvaluator - for evaluating algorithm's results.
         :param sessions: past user-tool-model interactions.
-        :param reference_session: reference session for comparing with algorithm's results.
+        :param prompt: the query for model for comparing results
+        :param reference: reference model's response for comparing with algorithm's results.
+        :param logger: the class for saving results of running and evaluating algorithms.
+        :param tools: tools/functions description for function calling.
         :return: list[dict[str, Any]]: results of running and evaluating algorithm.
         """
-        user_role_messages = reference_session.get_messages_by_role("USER")
-        query = user_role_messages[-1]
-
         metrics: list[dict[str, Any]] = []
         for algorithm in algorithms:
-            state = algorithm.process_dialogue(sessions, query.content)
-            metric: MetricState = evaluator_function.evaluate(sessions, query, state)
+            state = algorithm.process_dialogue(sessions, prompt, PLAN_SCHEMA, tools)
 
-            record: dict[str, Any] | None = self.logger.log_iteration(
+            algorithm_metrics: list[MetricState] = []
+            for evaluator_function in evaluator_functions:
+                metric: MetricState = evaluator_function.evaluate(sessions, prompt, state, reference)
+                algorithm_metrics.append(metric)
+
+            record: dict[str, Any] = logger.log_iteration(
                 algorithm.__class__.__name__,
-                query.content,
+                prompt,
                 1,
                 sessions,
                 state,
-                metric
+                algorithm_metrics
             )
-
-            assert record is not None, "logger didn't return a value"
 
             metrics.append(record)
 
