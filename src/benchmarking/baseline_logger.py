@@ -29,7 +29,7 @@ class BaselineLogger(BaseLogger):
 
         if metrics is not None:
             metrics_dict = [
-                {"metric_name": metric.metric.value, "metric_value": metric.value}
+                {"metric_name": metric.metric, "metric_value": metric.value}
                 for metric in metrics
             ]
             record["metric"] = metrics_dict

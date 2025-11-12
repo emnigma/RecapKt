@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Any
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -68,8 +69,7 @@ class Runner:
             None
         )
 
-        print(memory_metrics)
-        print(baseline_metrics)
+        Runner.__print_metrics([*baseline_metrics, *memory_metrics])
 
     def __execute_query_and_reference(self, past_interactions: Session) -> QueryAndReference:
         reference: list[BaseBlock] = []
@@ -97,11 +97,19 @@ class Runner:
         rendered_prompt = template.render(query=query.content)
         return rendered_prompt
 
+    @staticmethod
+    def __print_metrics(log_records: list[dict[str, Any]]) -> None:
+        for record in log_records:
+            print(f"System: {record['system']}")
+            print("Metrics:")
+            for metric in record.get("metric"):
+                print(f"  - {metric.get("metric_name")}: {metric.get("metric_value")}")
+            print("\n")
 
 
 if __name__ == "__main__":
     runner = Runner()
     runner.run(
-        dir_path=Path("/Users/mikhailkharlamov/Documents/Explyt/create-agents-md"),
+        dir_path=Path("/Users/mikhailkharlamov/Documents/.../create-agents-md"),
         session_file="chat_20251022_001157_763_6010.messages.json"
     )
