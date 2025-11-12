@@ -7,7 +7,7 @@ from src.benchmarking.baseline import DialogueBaseline
 from src.benchmarking.baseline_logger import BaselineLogger
 from src.benchmarking.memory_logger import MemoryLogger
 from src.benchmarking.tool_metrics.calculator import Calculator
-from src.benchmarking.tool_metrics.evaluators.simple_evaluator import SimpleEvaluator
+from src.benchmarking.tool_metrics.evaluators.f1_tool_evaluator import F1ToolEvaluator
 from src.benchmarking.tool_metrics.load_session import Loader
 from src.benchmarking.tool_metrics.utils import QueryAndReference
 from src.summarize_algorithms.core.models import BaseBlock, Session
@@ -46,11 +46,11 @@ class Runner:
         query, reference = query_and_reference.query, query_and_reference.reference
         prompt = self.__prepare_query_for_the_first_stage(query)
 
-        simple_evaluator = SimpleEvaluator()
+        f1_tool_evaluator = F1ToolEvaluator()
 
         baseline_metrics = Calculator.evaluate(
             baseline_algorithms,
-            [simple_evaluator],
+            [f1_tool_evaluator],
             [past_interactions],
             prompt,
             reference,
@@ -60,7 +60,7 @@ class Runner:
 
         memory_metrics = Calculator.evaluate(
             algorithms_with_memory,
-            [simple_evaluator],
+            [f1_tool_evaluator],
             [past_interactions],
             prompt,
             reference,
@@ -102,6 +102,6 @@ class Runner:
 if __name__ == "__main__":
     runner = Runner()
     runner.run(
-        dir_path=Path("/Users/mikhailkharlamov/Documents/.../create-agents-md"),
+        dir_path=Path("/Users/mikhailkharlamov/Documents/Explyt/create-agents-md"),
         session_file="chat_20251022_001157_763_6010.messages.json"
     )

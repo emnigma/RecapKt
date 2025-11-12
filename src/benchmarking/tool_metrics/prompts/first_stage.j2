@@ -23,7 +23,7 @@
         •	Keep descriptions concise and operational. Avoid speculative content beyond stated assumptions.
     **Tools Catalog**
         •	You may only plan calls to tools declared in ToolsCatalog.
-        •	Use the exact tool name in plan_stepsi.name when kind = “tool_call”.
+        •	Use the exact tool name in plan_steps.name when kind = “tool_call”.
         •	Populate args according to the tool’s argument spec. Unknown values must be null and justified in assumptions.
         •   Here is a list of tools that you can use when building a plan. these tools do not need to be called, they need to be used precisely as stages of the plan, if you think that their call may be necessary for the executor of the plan to achieve a result. here are the tools themselves:
         [
