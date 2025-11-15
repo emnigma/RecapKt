@@ -6,10 +6,10 @@ from src.benchmarking.tool_metrics.calculator import Calculator
 from src.summarize_algorithms.core.models import (
     BaseBlock,
     DialogueState,
-    MetricState,
-    MetricType,
     Session,
 )
+from src.benchmarking.models.dtos import MetricState
+from src.benchmarking.models.enums import MetricType
 
 
 @pytest.fixture

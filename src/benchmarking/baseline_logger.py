@@ -1,10 +1,12 @@
 import json
+import os
 
 from datetime import datetime
-from typing import Any
+from pathlib import Path
 
 from src.benchmarking.base_logger import BaseLogger
-from src.summarize_algorithms.core.models import DialogueState, MetricState, Session
+from src.summarize_algorithms.core.models import DialogueState, Session
+from src.benchmarking.models.dtos import MetricState, BaseRecord
 
 
 class BaselineLogger(BaseLogger):
@@ -15,8 +17,9 @@ class BaselineLogger(BaseLogger):
             iteration: int,
             sessions: list[Session],
             state: DialogueState | None = None,
-            metrics: list[MetricState] | None = None
-    ) -> dict[str, Any]:
+            metrics: list[MetricState] | None = None,
+            subdirectory: str | Path | None = None
+    ) -> BaseRecord:
         self.logger.info(f"Logging iteration {iteration} to {self.log_dir}")
 
         record = {
@@ -24,6 +27,7 @@ class BaselineLogger(BaseLogger):
             "iteration": iteration,
             "system": system_name,
             "query": query,
+            "response": getattr(state, "response", None),
             "sessions": [s.to_dict() for s in sessions],
         }
 
@@ -34,10 +38,20 @@ class BaselineLogger(BaseLogger):
             ]
             record["metric"] = metrics_dict
 
-        with open(self.log_dir / (system_name + str(iteration) + ".jsonl"), "a", encoding="utf-8") as f:
+        if subdirectory is not None:
+            directory: Path | str = self.log_dir / subdirectory
+            os.makedirs(directory, exist_ok=True)
+        else:
+            directory: Path | str = self.log_dir
+
+        with open(
+                directory / (system_name +'-' + system_name + '-' + record["timestamp"] + ".jsonl"),
+                "a",
+                encoding="utf-8"
+        ) as f:
             f.write(json.dumps(record, ensure_ascii=False, indent=4))
             f.write("\n")
 
         self.logger.info(f"Saved successfully iteration {iteration} to {self.log_dir}")
 
-        return record
+        return BaseRecord.from_dict(record)

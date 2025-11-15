@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -7,10 +8,10 @@ from jinja2 import Environment, FileSystemLoader
 from src.benchmarking.baseline import DialogueBaseline
 from src.benchmarking.baseline_logger import BaselineLogger
 from src.benchmarking.memory_logger import MemoryLogger
-from src.benchmarking.tool_metrics.calculator import Calculator
 from src.benchmarking.tool_metrics.evaluators.f1_tool_evaluator import F1ToolEvaluator
 from src.benchmarking.tool_metrics.load_session import Loader
-from src.benchmarking.tool_metrics.utils import QueryAndReference
+from src.benchmarking.models.dtos import QueryAndReference, StatisticsDto
+from src.benchmarking.tool_metrics.statistics import Statistics
 from src.summarize_algorithms.core.models import BaseBlock, Session
 from src.summarize_algorithms.memory_bank.dialogue_system import (
     MemoryBankDialogueSystem,
@@ -31,16 +32,25 @@ class Runner:
         memory_logger = MemoryLogger()
         baseline_logger = BaselineLogger()
 
-        base_recsum = RecsumDialogueSystem(embed_code=False, embed_tool=False)
-        base_memory_bank = MemoryBankDialogueSystem(embed_code=False, embed_tool=False)
-        baseline = DialogueBaseline("FullBaseline")
+        base_recsum = RecsumDialogueSystem(embed_code=False, embed_tool=False, system_name="BaseRecsum")
+        base_memory_bank = MemoryBankDialogueSystem(embed_code=False, embed_tool=False, system_name="BaseMemoryBank")
+        rag_recsum = RecsumDialogueSystem(embed_code=True, embed_tool=True, system_name="RagRecsum")
+        rag_memory_bank = MemoryBankDialogueSystem(embed_code=True, embed_tool=True, system_name="RagMemoryBank")
+        full_baseline = DialogueBaseline("FullBaseline")
+        last_baseline = DialogueBaseline("LastBaseline")
 
         algorithms_with_memory = [
             base_recsum,
-            base_memory_bank
+            base_memory_bank,
+            rag_recsum,
+            rag_memory_bank
         ]
-        baseline_algorithms = [baseline]
+        baseline_algorithms = [
+            full_baseline,
+            last_baseline
+        ]
 
+        self.logger.info("Start parsing session")
         past_interactions = Loader.load_session(dir_path / session_file)
 
         query_and_reference = self.__execute_query_and_reference(past_interactions)
@@ -49,27 +59,37 @@ class Runner:
 
         f1_tool_evaluator = F1ToolEvaluator()
 
-        baseline_metrics = Calculator.evaluate(
+        subdirectory: Path = Path(datetime.now().isoformat())
+
+        self.logger.info("Start evaluating baseline statistics")
+        baseline_statistics: StatisticsDto = Statistics.calculate(
+            10,
             baseline_algorithms,
             [f1_tool_evaluator],
             [past_interactions],
             prompt,
             reference,
             baseline_logger,
-            None
+            None,
+            subdirectory
         )
 
-        memory_metrics = Calculator.evaluate(
+        self.logger.info("Start evaluating memory statistics")
+        memory_statistics: StatisticsDto = Statistics.calculate(
+            10,
             algorithms_with_memory,
             [f1_tool_evaluator],
             [past_interactions],
             prompt,
             reference,
             memory_logger,
-            None
+            None,
+            subdirectory
         )
 
-        Runner.__print_metrics([*baseline_metrics, *memory_metrics])
+        Runner.__print_statistics(
+            StatisticsDto(algorithms=[*baseline_statistics.algorithms, *memory_statistics.algorithms])
+        )
 
     def __execute_query_and_reference(self, past_interactions: Session) -> QueryAndReference:
         reference: list[BaseBlock] = []
@@ -106,8 +126,26 @@ class Runner:
                 print(f"  - {metric.get("metric_name")}: {metric.get("metric_value")}")
             print("\n")
 
+    @staticmethod
+    def __print_statistics(stats: StatisticsDto) -> None:
+        """
+        Печать сводной статистики по алгоритмам и метрикам.
+        """
+        print("=== Statistics ===")
+        for alg_stat in stats.algorithms:
+            metric_name = alg_stat.metric.value
+
+            print(f"Algorithm: {alg_stat.name}")
+            print(f"  Metric: {metric_name}")
+            print(f"  Count of launches: {alg_stat.count_of_launches}")
+            print(f"  Math. expectation: {alg_stat.mean:.4f}")
+            print(f"  Variance: {alg_stat.variance:.4f}")
+            print()
+
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
     runner = Runner()
     runner.run(
         dir_path=Path("/Users/mikhailkharlamov/Documents/.../create-agents-md"),

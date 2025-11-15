@@ -8,10 +8,10 @@ from typing import Any
 from src.summarize_algorithms.core.models import (
     DialogueState,
     MemoryBankDialogueState,
-    MetricState,
     RecsumDialogueState,
     Session,
 )
+from src.benchmarking.models.dtos import MetricState, BaseRecord
 
 
 class BaseLogger(ABC):
@@ -28,8 +28,9 @@ class BaseLogger(ABC):
             iteration: int,
             sessions: list[Session],
             state: DialogueState | None,
-            metrics: list[MetricState] | None = None
-    ) -> dict[str, Any]:
+            metrics: list[MetricState] | None = None,
+            subdirectory: str | Path | None = None
+    ) -> BaseRecord:
         ...
 
     @staticmethod

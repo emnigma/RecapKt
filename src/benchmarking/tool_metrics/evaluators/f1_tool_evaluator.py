@@ -1,5 +1,9 @@
+import json
+from typing import Any
+
 from src.benchmarking.tool_metrics.evaluators.base_evaluator import BaseEvaluator
-from src.summarize_algorithms.core.models import Session, DialogueState, BaseBlock, MetricState, ToolCallBlock
+from src.summarize_algorithms.core.models import Session, DialogueState, BaseBlock, ToolCallBlock
+from src.benchmarking.models.dtos import MetricState
 
 
 class F1ToolEvaluator(BaseEvaluator):
@@ -27,7 +31,13 @@ class F1ToolEvaluator(BaseEvaluator):
             map(
                 lambda x: x.get("name", ""),
                 filter(
-                    lambda x: x.get("kind", "") == "tool_call",
+                    lambda x: x.get("kind", "") == "tool_call" and any(
+                        [
+                            F1ToolEvaluator.__compare_arguments_for_null(x.get("args", {}), json.loads(r.arguments))
+                            for r in reference
+                            if isinstance(r, ToolCallBlock)
+                        ]
+                    ),
                     state.response.get("plan_steps", [])
                 )
             )
@@ -57,3 +67,13 @@ class F1ToolEvaluator(BaseEvaluator):
 
         f1_score = 2 * (precision * recall) / (precision + recall)
         return f1_score
+
+    @staticmethod
+    def __compare_arguments_for_null(first_argument: dict[str, Any], second_argument: dict[str, Any]) -> bool:
+        """
+        Compares the positions of null arguments in two sets of tool call arguments.
+        :return: bool: True if null positions are equal in both arguments, False otherwise.
+        """
+        first_null_positions = {key for key, value in first_argument.items() if value is None}
+        second_null_positions = {key for key, value in second_argument.items() if value is None}
+        return first_null_positions == second_null_positions

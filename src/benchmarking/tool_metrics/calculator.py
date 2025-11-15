@@ -1,10 +1,13 @@
+import logging
+from pathlib import Path
 from typing import Any
 
 from src.benchmarking.base_logger import BaseLogger
 from src.benchmarking.tool_metrics.evaluators.base_evaluator import BaseEvaluator
 from src.benchmarking.tool_metrics.json_schemas import PLAN_SCHEMA
 from src.summarize_algorithms.core.dialog import Dialog
-from src.summarize_algorithms.core.models import BaseBlock, MetricState, Session
+from src.summarize_algorithms.core.models import BaseBlock, Session
+from src.benchmarking.models.dtos import MetricState, BaseRecord
 
 
 class Calculator:
@@ -19,8 +22,9 @@ class Calculator:
             prompt: str,
             reference: list[BaseBlock],
             logger: BaseLogger,
-            tools: list[dict[str, Any]] | None = None
-    ) -> list[dict[str, Any]]:
+            tools: list[dict[str, Any]] | None = None,
+            subdirectory: str | Path | None = None
+    ) -> list[BaseRecord]:
         """
         The main method for run and evaluate algorithm with the ast sessions.
         :param algorithms: class that implements Dialog protocol.
@@ -30,10 +34,13 @@ class Calculator:
         :param reference: reference model's response for comparing with algorithm's results.
         :param logger: the class for saving results of running and evaluating algorithms.
         :param tools: tools/functions description for function calling.
+        :param subdirectory: directory for grouping metric logs.
         :return: list[dict[str, Any]]: results of running and evaluating algorithm.
         """
-        metrics: list[dict[str, Any]] = []
+        system_logger = logging.getLogger()
+        metrics: list[BaseRecord] = []
         for algorithm in algorithms:
+            system_logger.info(f"Calculating {algorithm.system_name}")
             state = algorithm.process_dialogue(sessions, prompt, PLAN_SCHEMA, tools)
 
             algorithm_metrics: list[MetricState] = []
@@ -41,13 +48,14 @@ class Calculator:
                 metric: MetricState = evaluator_function.evaluate(sessions, prompt, state, reference)
                 algorithm_metrics.append(metric)
 
-            record: dict[str, Any] = logger.log_iteration(
-                algorithm.__class__.__name__,
+            record: BaseRecord = logger.log_iteration(
+                algorithm.system_name,
                 prompt,
                 1,
                 sessions,
                 state,
-                algorithm_metrics
+                algorithm_metrics,
+                subdirectory / algorithm.system_name
             )
 
             metrics.append(record)

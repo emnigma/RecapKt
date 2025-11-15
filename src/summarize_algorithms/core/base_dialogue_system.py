@@ -41,7 +41,13 @@ class BaseDialogueSystem(ABC, Dialog):
         embed_tool: bool = False,
         embed_model: Optional[Embeddings] = None,
         max_session_id: int = 3,
+        system_name: str | None = None
     ) -> None:
+        if system_name is None:
+            self.system_name = self.__class__.__name__
+        else:
+            self.system_name = system_name
+
         load_dotenv()
 
         api_key: str | None = os.getenv("OPENAI_API_KEY")

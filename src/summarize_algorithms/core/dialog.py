@@ -4,6 +4,8 @@ from src.summarize_algorithms.core.models import DialogueState, Session
 
 
 class Dialog(Protocol):
+    system_name: str
+
     def process_dialogue(
             self,
             sessions: list[Session],

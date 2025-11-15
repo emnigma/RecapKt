@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from src.summarize_algorithms.core.models import (
     BaseBlock,
     DialogueState,
-    MetricState,
     Session,
 )
+from src.benchmarking.models.dtos import MetricState
 
 
 class BaseEvaluator(ABC):
