@@ -1,22 +1,18 @@
 import json
+import logging
 from collections import Counter
+from itertools import product
 from math import fsum
 from pathlib import Path
 from typing import Any, TypeVar
-from itertools import product
-
-import logging
-
-import jsonlines
 
 from src.benchmarking.base_logger import BaseLogger
+from src.benchmarking.models.dtos import StatisticsDto, BaseRecord, AlgorithmStatistics, MemoryRecord
 from src.benchmarking.models.enums import MetricType
 from src.benchmarking.tool_metrics.calculator import Calculator
 from src.benchmarking.tool_metrics.evaluators.base_evaluator import BaseEvaluator
-from src.benchmarking.models.dtos import StatisticsDto, BaseRecord, AlgorithmStatistics, MemoryRecord
 from src.summarize_algorithms.core.dialog import Dialog
 from src.summarize_algorithms.core.models import Session, BaseBlock
-
 
 NumberT = TypeVar("NumberT", int, float)
 
@@ -167,7 +163,7 @@ if __name__ == "__main__":
         "RagRecsum"
     ]:
         folder = Path("logs/memory/2025-11-15T21:57:10.007355") / f
-        for path in folder.glob("*.jsonl"):
+        for path in folder.glob("*.json"):
             print(path)
             with path.open("r", encoding="utf-8") as f:
                 obj = json.load(f)

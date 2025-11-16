@@ -49,7 +49,7 @@ class MemoryLogger(BaseLogger):
             directory: Path | str = self.log_dir
 
         with open(
-                directory / (system_name + '-' + record["timestamp"] + ".jsonl"),
+                directory / (system_name + '-' + record["timestamp"] + ".json"),
                 "a",
                 encoding="utf-8"
         ) as f:
