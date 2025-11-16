@@ -31,8 +31,8 @@ class StatisticsDto:
 @dataclass_json
 @dataclass
 class MetricState:
-    metric: MetricType
-    value: float | int
+    metric_name: MetricType
+    metric_value: float | int
 
 
 @dataclass_json
@@ -44,7 +44,7 @@ class BaseRecord:
     query: str
     response: Any
     sessions: list[dict[str, Any]]
-    metrics: list[MetricState] | None = field(default=None)
+    metric: list[MetricState] | None = field(default=None)
 
 
 @dataclass_json

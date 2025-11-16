@@ -37,7 +37,7 @@ class MemoryLogger(BaseLogger):
 
         if metrics is not None:
             metrics_dict = [
-                {"metric_name": metric.metric, "metric_value": metric.value}
+                {"metric_name": metric.metric_name, "metric_value": metric.metric_value}
                 for metric in metrics
             ]
             record["metric"] = metrics_dict
@@ -49,7 +49,7 @@ class MemoryLogger(BaseLogger):
             directory: Path | str = self.log_dir
 
         with open(
-                directory / (system_name + '-' + system_name + '-' + record["timestamp"] + ".jsonl"),
+                directory / (system_name + '-' + record["timestamp"] + ".jsonl"),
                 "a",
                 encoding="utf-8"
         ) as f:
