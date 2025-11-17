@@ -52,7 +52,7 @@ class Runner:
         ]
 
         self.logger.info("Start parsing session")
-        past_interactions = Loader.load_session(dir_path / session_file)
+        past_interactions = Loader.load_session_data_type_2(dir_path / session_file)
 
         query_and_reference = self.__execute_query_and_reference(past_interactions)
         query, reference = query_and_reference.query, query_and_reference.reference
