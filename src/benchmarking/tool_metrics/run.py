@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -10,7 +11,7 @@ from src.benchmarking.baseline_logger import BaselineLogger
 from src.benchmarking.memory_logger import MemoryLogger
 from src.benchmarking.tool_metrics.evaluators.f1_tool_evaluator import F1ToolEvaluator
 from src.benchmarking.tool_metrics.load_session import Loader
-from src.benchmarking.models.dtos import QueryAndReference, StatisticsDto
+from src.benchmarking.models.dtos import QueryAndReference, StatisticsDto, BaseRecord, MemoryRecord
 from src.benchmarking.tool_metrics.statistics import Statistics
 from src.summarize_algorithms.core.models import BaseBlock, Session
 from src.summarize_algorithms.memory_bank.dialogue_system import (
@@ -91,6 +92,32 @@ class Runner:
             StatisticsDto(algorithms=[*baseline_statistics.algorithms, *memory_statistics.algorithms])
         )
 
+    @staticmethod
+    def get_statistics_by_directory_with_logs(path: Path | str) -> StatisticsDto:
+        records: list[BaseRecord] = []
+        for f in [
+            "BaseMemoryBank",
+            "BaseRecsum",
+            "FullBaseline",
+            "LastBaseline",
+            "RagMemoryBank",
+            "RagRecsum"
+        ]:
+            folder = Path(path) / f
+            for path in folder.glob("*.json"):
+                print(path)
+                with path.open("r", encoding="utf-8") as f:
+                    obj = json.load(f)
+                    if obj.get("memory") is None:
+                        record = BaseRecord.from_dict(obj)
+                    else:
+                        record = MemoryRecord.from_dict(obj)
+                    records.append(record)
+        return Statistics.calculate_by_logs(
+            count_of_launches=10,
+            metrics=records
+        )
+
     def __execute_query_and_reference(self, past_interactions: Session) -> QueryAndReference:
         reference: list[BaseBlock] = []
         query: BaseBlock | None = None
@@ -126,25 +153,13 @@ class Runner:
                 print(f"  - {metric.get("metric_name")}: {metric.get("metric_value")}")
             print("\n")
 
-    @staticmethod
-    def __print_statistics(stats: StatisticsDto) -> None:
-        """
-        Печать сводной статистики по алгоритмам и метрикам.
-        """
-        print("=== Statistics ===")
-        for alg_stat in stats.algorithms:
-            metric_name = alg_stat.metric.value
-
-            print(f"Algorithm: {alg_stat.name}")
-            print(f"  Metric: {metric_name}")
-            print(f"  Count of launches: {alg_stat.count_of_launches}")
-            print(f"  Math. expectation: {alg_stat.mean:.4f}")
-            print(f"  Variance: {alg_stat.variance:.4f}")
-            print()
-
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+
+    Statistics.print_statistics(
+        Runner.get_statistics_by_directory_with_logs("logs/memory/2025-11-15T21:57:10.007355")
+    )
 
     runner = Runner()
     runner.run(
