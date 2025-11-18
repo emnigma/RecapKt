@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from src.benchmarking.base_logger import BaseLogger
 from src.benchmarking.tool_metrics.evaluators.base_evaluator import BaseEvaluator
@@ -22,8 +22,9 @@ class Calculator:
             prompt: str,
             reference: list[BaseBlock],
             logger: BaseLogger,
-            tools: list[dict[str, Any]] | None = None,
-            subdirectory: str | Path | None = None
+            tools: Optional[list[dict[str, Any]]] = None,
+            subdirectory: Optional[str | Path] = None,
+            iteration: Optional[int] = None
     ) -> list[BaseRecord]:
         """
         The main method for run and evaluate algorithm with the ast sessions.
@@ -35,6 +36,7 @@ class Calculator:
         :param logger: the class for saving results of running and evaluating algorithms.
         :param tools: tools/functions description for function calling.
         :param subdirectory: directory for grouping metric logs.
+        :param iteration.
         :return: list[dict[str, Any]]: results of running and evaluating algorithm.
         """
         system_logger = logging.getLogger()
@@ -51,7 +53,7 @@ class Calculator:
             record: BaseRecord = logger.log_iteration(
                 algorithm.system_name,
                 prompt,
-                1,
+                iteration or 1,
                 sessions,
                 state,
                 algorithm_metrics,

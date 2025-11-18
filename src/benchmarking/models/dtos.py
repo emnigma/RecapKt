@@ -3,8 +3,8 @@ from typing import Any
 
 from dataclasses_json import dataclass_json
 
-from src.benchmarking.models.enums import MetricType
-from src.summarize_algorithms.core.models import BaseBlock
+from src.benchmarking.models.enums import MetricType, ModelPriceForMillionTokensInDollars
+from src.summarize_algorithms.core.models import BaseBlock, OpenAIModels
 
 
 @dataclass
@@ -57,3 +57,14 @@ class MemoryRecord(BaseRecord):
 @dataclass
 class Evaluation:
     memory: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class TokenInfo:
+    model: OpenAIModels
+    price: ModelPriceForMillionTokensInDollars
+    input_tokens: int
+    output_tokens: int
+    input_price: float
+    output_price: float
+    full_price: float

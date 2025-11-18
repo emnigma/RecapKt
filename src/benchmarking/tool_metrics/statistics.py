@@ -1,7 +1,9 @@
 import json
 import logging
+import random
 from collections import Counter
 from itertools import product
+from logging import Logger
 from math import fsum
 from pathlib import Path
 from typing import Any
@@ -22,6 +24,7 @@ class Statistics:
             algorithms: list[Dialog],
             evaluator_functions: list[BaseEvaluator],
             sessions: list[Session],
+            gold_session: Session,
             prompt: str,
             reference: list[BaseBlock],
             logger: BaseLogger,
@@ -31,27 +34,24 @@ class Statistics:
     ) -> StatisticsDto:
         system_logger = logging.getLogger()
 
-        if shuffle:
-            prepared_sessions: list[list[Session]] = [list(s) for s in product(sessions)]
-            system_logger.info("Sessions shuffled")
-        else:
-            prepared_sessions: list[list[Session]] = [sessions] * count_of_launches
-
-        assert count_of_launches <= len(prepared_sessions),\
-            "Count of launches should be less or equal than square of len(sessions)."
-
         values_by_alg_metric: dict[tuple[str, MetricType], list[float]] = {}
         for i in range(count_of_launches):
+            if shuffle:
+                random.shuffle(sessions)
+            prepared_sessions: list[Session] = sessions.copy()
+            prepared_sessions.append(gold_session)
+
             system_logger.info(f"Starting evaluation launch {i}")
             metrics: list[BaseRecord] = Calculator.evaluate(
                 algorithms,
                 evaluator_functions,
-                prepared_sessions[i],
+                prepared_sessions,
                 prompt,
                 reference,
                 logger,
                 tools,
-                subdirectory
+                subdirectory,
+                i
             )
 
             for record in metrics:
@@ -59,6 +59,8 @@ class Statistics:
                     continue
                 for metric_state in record.metric:
                     key = (record.system, metric_state.metric_name)
+                    if key not in values_by_alg_metric:
+                        values_by_alg_metric[key] = []
                     values_by_alg_metric[key].append(float(metric_state.metric_value))
 
         return Statistics.__get_statistic_metrics(count_of_launches, system_logger, values_by_alg_metric)

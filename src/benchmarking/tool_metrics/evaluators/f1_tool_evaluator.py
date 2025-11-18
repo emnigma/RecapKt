@@ -50,8 +50,8 @@ class F1ToolEvaluator(BaseEvaluator):
         f1_score = F1ToolEvaluator.__calculate_f1(true_positives, false_positives, false_negatives)
 
         return MetricState(
-            metric="F1_TOOL",
-            value=f1_score
+            metric_name="F1_TOOL",
+            metric_value=f1_score
         )
 
     @staticmethod

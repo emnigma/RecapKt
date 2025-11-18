@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import tiktoken
 from jinja2 import Environment, FileSystemLoader
 
 from src.benchmarking.baseline import DialogueBaseline
@@ -11,13 +12,14 @@ from src.benchmarking.baseline_logger import BaselineLogger
 from src.benchmarking.memory_logger import MemoryLogger
 from src.benchmarking.tool_metrics.evaluators.f1_tool_evaluator import F1ToolEvaluator
 from src.benchmarking.tool_metrics.load_session import Loader
-from src.benchmarking.models.dtos import QueryAndReference, StatisticsDto, BaseRecord, MemoryRecord
+from src.benchmarking.models.dtos import QueryAndReference, StatisticsDto, BaseRecord, MemoryRecord, TokenInfo
 from src.benchmarking.tool_metrics.statistics import Statistics
-from src.summarize_algorithms.core.models import BaseBlock, Session
+from src.summarize_algorithms.core.models import BaseBlock, Session, OpenAIModels
 from src.summarize_algorithms.memory_bank.dialogue_system import (
     MemoryBankDialogueSystem,
 )
 from src.summarize_algorithms.recsum.dialogue_system import RecsumDialogueSystem
+from src.utils.configure_logs import configure_logs
 
 
 class Runner:
@@ -29,7 +31,7 @@ class Runner:
             trim_blocks=True
         )
 
-    def run(self, dir_path: Path, session_file: Path | str) -> None:
+    def run(self) -> None:
         memory_logger = MemoryLogger()
         baseline_logger = BaselineLogger()
 
@@ -52,9 +54,26 @@ class Runner:
         ]
 
         self.logger.info("Start parsing session")
-        past_interactions = Loader.load_session_data_type_2(dir_path / session_file)
+        past_interactions: list[Session] = []
 
-        query_and_reference = self.__execute_query_and_reference(past_interactions)
+        json_file_template: str = "*.json"
+        path_data_type_1: Path = Path("/Users/mikhailkharlamov/Documents/.../data_type_1")
+        for file in path_data_type_1.glob(json_file_template):
+            past_interactions.append(
+                Loader.load_session_data_type_1(file)
+            )
+
+        path_data_type_2: Path = Path("/Users/mikhailkharlamov/Documents/.../data_type_2")
+        for file in path_data_type_2.glob(json_file_template):
+            past_interactions.append(
+                Loader.load_session_data_type_2(file)
+            )
+
+        gold_session: Session = Loader.load_session_data_type_2(
+            "/Users/mikhailkharlamov/Documents/.../gold_session.json"
+        )
+
+        query_and_reference = self.__execute_query_and_reference(gold_session)
         query, reference = query_and_reference.query, query_and_reference.reference
         prompt = self.__prepare_query_for_the_first_stage(query)
 
@@ -67,12 +86,14 @@ class Runner:
             10,
             baseline_algorithms,
             [f1_tool_evaluator],
-            [past_interactions],
+            past_interactions,
+            gold_session,
             prompt,
             reference,
             baseline_logger,
             None,
-            subdirectory
+            subdirectory,
+            True
         )
 
         self.logger.info("Start evaluating memory statistics")
@@ -80,7 +101,8 @@ class Runner:
             10,
             algorithms_with_memory,
             [f1_tool_evaluator],
-            [past_interactions],
+            past_interactions,
+            gold_session,
             prompt,
             reference,
             memory_logger,
@@ -88,7 +110,7 @@ class Runner:
             subdirectory
         )
 
-        Runner.__print_statistics(
+        Statistics.print_statistics(
             StatisticsDto(algorithms=[*baseline_statistics.algorithms, *memory_statistics.algorithms])
         )
 
@@ -117,6 +139,10 @@ class Runner:
             count_of_launches=10,
             metrics=records
         )
+
+    @staticmethod
+    def get_spent_tokens_count(logs: BaseRecord, model: OpenAIModels) -> TokenInfo:
+        ...
 
     def __execute_query_and_reference(self, past_interactions: Session) -> QueryAndReference:
         reference: list[BaseBlock] = []
@@ -153,16 +179,19 @@ class Runner:
                 print(f"  - {metric.get("metric_name")}: {metric.get("metric_value")}")
             print("\n")
 
+    @staticmethod
+    def __count_tokens(text: str, model: OpenAIModels) -> int:
+        encoding = tiktoken.encoding_for_model(model.value)
+        tokens = encoding.encode(text)
+        return len(tokens)
+
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    configure_logs(loglevel=logging.INFO)
 
-    Statistics.print_statistics(
+    """Statistics.print_statistics(
         Runner.get_statistics_by_directory_with_logs("logs/memory/2025-11-15T21:57:10.007355")
-    )
+    )"""
 
     runner = Runner()
-    runner.run(
-        dir_path=Path("/Users/mikhailkharlamov/Documents/.../create-agents-md"),
-        session_file="chat_20251022_001157_763_6010.messages.json"
-    )
+    runner.run()
