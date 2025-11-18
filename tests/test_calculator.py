@@ -6,10 +6,10 @@ from src.benchmarking.tool_metrics.calculator import Calculator
 from src.summarize_algorithms.core.models import (
     BaseBlock,
     DialogueState,
-    MetricState,
-    MetricType,
     Session,
 )
+from src.benchmarking.models.dtos import MetricState
+from src.benchmarking.models.enums import MetricType
 
 
 @pytest.fixture
@@ -53,19 +53,20 @@ def sessions():
 def reference_session():
     return Session([
         BaseBlock(role="USER", content="Tell me about AI."),
-        BaseBlock(role="ASSISTANT", content="AI stands for artificial intelligence."),
-        BaseBlock(role="USER", content="What is AI?")
+        BaseBlock(role="ASSISTANT", content="AI stands for artificial intelligence.")
     ])
 
 
 def test_evaluate_success(fake_logger, fake_evaluator, fake_algorithm, sessions, reference_session):
-    calc = Calculator(logger=fake_logger)
+    calc = Calculator()
 
     results = calc.evaluate(
         algorithms=[fake_algorithm],
-        evaluator_function=fake_evaluator,
+        evaluator_functions=[fake_evaluator],
         sessions=sessions[:1],
-        reference_session=reference_session
+        reference=reference_session.messages,
+        logger=fake_logger,
+        prompt="What is AI?",
     )
 
     assert isinstance(results, list)

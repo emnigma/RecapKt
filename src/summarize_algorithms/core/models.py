@@ -114,10 +114,10 @@ class DialogueState:
     tool_memory_storage: Optional[MemoryStorage]
     query: str
     current_session_index: int = 0
-    _response: Optional[str] = None
+    _response: Optional[str | dict[str, Any]] = None
 
     @property
-    def response(self) -> str:
+    def response(self) -> str | dict[str, Any]:
         if self._response is None:
             raise ValueError("Response has not been generated yet.")
         return self._response
@@ -143,17 +143,6 @@ class MemoryBankDialogueState(DialogueState):
     from src.summarize_algorithms.core.memory_storage import MemoryStorage
 
     text_memory_storage: MemoryStorage = field(default_factory=MemoryStorage)
-
-
-class MetricType(Enum):
-    COHERENCE = "coherence"
-
-
-@dataclass_json
-@dataclass
-class MetricState:
-    metric: MetricType
-    value: float | int
 
 
 class WorkflowNode(Enum):

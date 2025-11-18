@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from src.summarize_algorithms.core.models import (
     BaseBlock,
     DialogueState,
-    MetricState,
     Session,
 )
+from src.benchmarking.models.dtos import MetricState
 
 
 class BaseEvaluator(ABC):
@@ -17,7 +17,7 @@ class BaseEvaluator(ABC):
     def evaluate(
             self,
             sessions: list[Session],
-            query: BaseBlock,
+            query: str,
             state: DialogueState,
             reference: list[BaseBlock] | None = None
     ) -> MetricState:

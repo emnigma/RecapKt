@@ -10,3 +10,4 @@ build/
 uv.lock
 .env
 src/benchmarking/agent_chat/logs
+src/benchmarking/tool_metrics/logs
